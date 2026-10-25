@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Météo Flip Clock</string>
+    <string name="home">Maison</string>
+    <string name="add_city">Ajouter une ville</string>
+    <string name="cities">Villes</string>
+    <string name="search_city">Rechercher une ville…</string>
+    <string name="save">Enregistrer</string>
+    <string name="delete">Supprimer</string>
+    <string name="current_location">Position actuelle</string>
+    <string name="loading">Chargement…</string>
+    <string name="error_network">Erreur réseau. Vérifiez votre connexion.</string>
+    <string name="error_api">Impossible de récupérer la météo.</string>
+    <string name="sunrise">Lever du soleil</string>
+    <string name="sunset">Coucher du soleil</string>
+    <string name="high_low">%1$s° / %2$s°</string>
+    <string name="feels_like">Ressenti %1$s°</string>
+    <string name="humidity">Humidité %1$d%%</string>
+    <string name="wind">Vent %1$.1f km/h</string>
+    <string name="no_cities">Aucune ville. Ajoutez-en une !</string>
+    <string name="api_key_hint">Clé OpenWeatherMap (optionnel pour démo)</string>
+</resources>
