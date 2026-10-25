@@ -12,6 +12,21 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
 
+private data class WpParticle(
+    var x: Float,
+    var y: Float,
+    var speed: Float,
+    var size: Float,
+    var alpha: Int = 200
+)
+
+private data class WpCloud(
+    var x: Float,
+    var y: Float,
+    var speed: Float,
+    var scale: Float
+)
+
 /**
  * Live Wallpaper style HTC Sense / Diamond – fond animé synchronisé avec la météo.
  */
@@ -29,8 +44,8 @@ class WeatherWallpaperService : WallpaperService() {
         private var weatherType = WeatherType.CLEAR
         private var isDay = true
 
-        private val particles = mutableListOf<Particle>()
-        private val clouds = mutableListOf<Cloud>()
+        private val particles = mutableListOf<WpParticle>()
+        private val clouds = mutableListOf<WpCloud>()
         private var flashAlpha = 0f
         private var lastFlash = 0L
         private var sunAngle = 0f
@@ -41,9 +56,6 @@ class WeatherWallpaperService : WallpaperService() {
                 if (visible) handler.postDelayed(this, 16)
             }
         }
-
-        data class Particle(var x: Float, var y: Float, var speed: Float, var size: Float, var alpha: Int = 200)
-        data class Cloud(var x: Float, var y: Float, var speed: Float, var scale: Float)
 
         override fun onCreate(surfaceHolder: SurfaceHolder) {
             super.onCreate(surfaceHolder)
@@ -88,27 +100,64 @@ class WeatherWallpaperService : WallpaperService() {
             when (weatherType) {
                 WeatherType.RAIN, WeatherType.DRIZZLE -> {
                     repeat(100) {
-                        particles.add(Particle(Random.nextFloat() * w, Random.nextFloat() * h, 14f + Random.nextFloat() * 20f, 2f + Random.nextFloat() * 3f))
+                        particles.add(
+                            WpParticle(
+                                Random.nextFloat() * w,
+                                Random.nextFloat() * h,
+                                14f + Random.nextFloat() * 20f,
+                                2f + Random.nextFloat() * 3f
+                            )
+                        )
                     }
                 }
                 WeatherType.THUNDERSTORM -> {
                     repeat(90) {
-                        particles.add(Particle(Random.nextFloat() * w, Random.nextFloat() * h, 18f + Random.nextFloat() * 25f, 2.5f + Random.nextFloat() * 3f))
+                        particles.add(
+                            WpParticle(
+                                Random.nextFloat() * w,
+                                Random.nextFloat() * h,
+                                18f + Random.nextFloat() * 25f,
+                                2.5f + Random.nextFloat() * 3f
+                            )
+                        )
                     }
                 }
                 WeatherType.SNOW -> {
                     repeat(70) {
-                        particles.add(Particle(Random.nextFloat() * w, Random.nextFloat() * h, 2f + Random.nextFloat() * 5f, 3f + Random.nextFloat() * 6f, 140 + Random.nextInt(100)))
+                        particles.add(
+                            WpParticle(
+                                Random.nextFloat() * w,
+                                Random.nextFloat() * h,
+                                2f + Random.nextFloat() * 5f,
+                                3f + Random.nextFloat() * 6f,
+                                140 + Random.nextInt(100)
+                            )
+                        )
                     }
                 }
                 WeatherType.CLEAR -> {
                     repeat(15) {
-                        particles.add(Particle(Random.nextFloat() * w, Random.nextFloat() * h * 0.7f, 0.25f + Random.nextFloat() * 0.5f, 25f + Random.nextFloat() * 50f, 25 + Random.nextInt(35)))
+                        particles.add(
+                            WpParticle(
+                                Random.nextFloat() * w,
+                                Random.nextFloat() * h * 0.7f,
+                                0.25f + Random.nextFloat() * 0.5f,
+                                25f + Random.nextFloat() * 50f,
+                                25 + Random.nextInt(35)
+                            )
+                        )
                     }
                 }
                 WeatherType.CLOUDS, WeatherType.MIST -> {
                     repeat(7) {
-                        clouds.add(Cloud(Random.nextFloat() * w * 1.4f - w * 0.2f, 60f + Random.nextFloat() * h * 0.45f, 0.35f + Random.nextFloat() * 0.7f, 0.8f + Random.nextFloat() * 1.0f))
+                        clouds.add(
+                            WpCloud(
+                                Random.nextFloat() * w * 1.4f - w * 0.2f,
+                                60f + Random.nextFloat() * h * 0.45f,
+                                0.35f + Random.nextFloat() * 0.7f,
+                                0.8f + Random.nextFloat() * 1.0f
+                            )
+                        )
                     }
                 }
                 else -> {}
@@ -127,7 +176,10 @@ class WeatherWallpaperService : WallpaperService() {
                     particles.forEach {
                         it.y += it.speed
                         it.x += it.speed * 0.12f
-                        if (it.y > h) { it.y = -20f; it.x = Random.nextFloat() * w }
+                        if (it.y > h) {
+                            it.y = -20f
+                            it.x = Random.nextFloat() * w
+                        }
                     }
                     if (weatherType == WeatherType.THUNDERSTORM) {
                         val now = System.currentTimeMillis()
@@ -142,7 +194,10 @@ class WeatherWallpaperService : WallpaperService() {
                     particles.forEach {
                         it.y += it.speed
                         it.x += sin(it.y * 0.015f) * 1.5f
-                        if (it.y > h) { it.y = -15f; it.x = Random.nextFloat() * w }
+                        if (it.y > h) {
+                            it.y = -15f
+                            it.x = Random.nextFloat() * w
+                        }
                     }
                 }
                 WeatherType.CLEAR -> {
@@ -173,7 +228,10 @@ class WeatherWallpaperService : WallpaperService() {
                 }
             } finally {
                 if (canvas != null) {
-                    try { holder.unlockCanvasAndPost(canvas) } catch (_: Exception) {}
+                    try {
+                        holder.unlockCanvasAndPost(canvas)
+                    } catch (_: Exception) {
+                    }
                 }
             }
         }
@@ -182,17 +240,52 @@ class WeatherWallpaperService : WallpaperService() {
             val paint = Paint()
             val colors = when (weatherType) {
                 WeatherType.CLEAR -> if (isDay)
-                    intArrayOf(Color.parseColor("#0D47A1"), Color.parseColor("#1565C0"), Color.parseColor("#1E88E5"))
+                    intArrayOf(
+                        Color.parseColor("#0D47A1"),
+                        Color.parseColor("#1565C0"),
+                        Color.parseColor("#1E88E5")
+                    )
                 else
-                    intArrayOf(Color.parseColor("#0A0A1F"), Color.parseColor("#12122F"), Color.parseColor("#1A1A3A"))
-                WeatherType.CLOUDS -> intArrayOf(Color.parseColor("#263238"), Color.parseColor("#37474F"), Color.parseColor("#455A64"))
-                WeatherType.RAIN, WeatherType.DRIZZLE -> intArrayOf(Color.parseColor("#1A237E"), Color.parseColor("#283593"), Color.parseColor("#3949AB"))
-                WeatherType.THUNDERSTORM -> intArrayOf(Color.parseColor("#0D0D15"), Color.parseColor("#1A1A2E"), Color.parseColor("#212121"))
-                WeatherType.SNOW -> intArrayOf(Color.parseColor("#37474F"), Color.parseColor("#546E7A"), Color.parseColor("#78909C"))
-                WeatherType.MIST -> intArrayOf(Color.parseColor("#424242"), Color.parseColor("#616161"), Color.parseColor("#757575"))
-                else -> intArrayOf(Color.parseColor("#0D0D15"), Color.parseColor("#1A1A2E"), Color.parseColor("#212121"))
+                    intArrayOf(
+                        Color.parseColor("#0A0A1F"),
+                        Color.parseColor("#12122F"),
+                        Color.parseColor("#1A1A3A")
+                    )
+                WeatherType.CLOUDS -> intArrayOf(
+                    Color.parseColor("#263238"),
+                    Color.parseColor("#37474F"),
+                    Color.parseColor("#455A64")
+                )
+                WeatherType.RAIN, WeatherType.DRIZZLE -> intArrayOf(
+                    Color.parseColor("#1A237E"),
+                    Color.parseColor("#283593"),
+                    Color.parseColor("#3949AB")
+                )
+                WeatherType.THUNDERSTORM -> intArrayOf(
+                    Color.parseColor("#0D0D15"),
+                    Color.parseColor("#1A1A2E"),
+                    Color.parseColor("#212121")
+                )
+                WeatherType.SNOW -> intArrayOf(
+                    Color.parseColor("#37474F"),
+                    Color.parseColor("#546E7A"),
+                    Color.parseColor("#78909C")
+                )
+                WeatherType.MIST -> intArrayOf(
+                    Color.parseColor("#424242"),
+                    Color.parseColor("#616161"),
+                    Color.parseColor("#757575")
+                )
+                else -> intArrayOf(
+                    Color.parseColor("#0D0D15"),
+                    Color.parseColor("#1A1A2E"),
+                    Color.parseColor("#212121")
+                )
             }
-            paint.shader = LinearGradient(0f, 0f, 0f, height.toFloat(), colors, null, Shader.TileMode.CLAMP)
+            paint.shader = LinearGradient(
+                0f, 0f, 0f, height.toFloat(),
+                colors, null, Shader.TileMode.CLAMP
+            )
             canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
 
             if (flashAlpha > 0.04f) {
@@ -204,7 +297,6 @@ class WeatherWallpaperService : WallpaperService() {
             val p = Paint(Paint.ANTI_ALIAS_FLAG)
             when (weatherType) {
                 WeatherType.CLEAR -> {
-                    // Sun with rotating rays (HTC style)
                     val cx = width * 0.75f
                     val cy = height * 0.22f
                     val r = width * 0.12f
@@ -227,7 +319,6 @@ class WeatherWallpaperService : WallpaperService() {
                         )
                     }
                     p.style = Paint.Style.FILL
-                    // Soft orbs
                     particles.forEach {
                         p.color = Color.argb(it.alpha, 255, 240, 180)
                         canvas.drawCircle(it.x, it.y, it.size, p)
@@ -238,7 +329,11 @@ class WeatherWallpaperService : WallpaperService() {
                     p.strokeWidth = 3f
                     p.strokeCap = Paint.Cap.ROUND
                     particles.forEach {
-                        canvas.drawLine(it.x, it.y, it.x - it.size * 0.4f, it.y + it.size * 5, p)
+                        canvas.drawLine(
+                            it.x, it.y,
+                            it.x - it.size * 0.4f, it.y + it.size * 5,
+                            p
+                        )
                     }
                 }
                 WeatherType.SNOW -> {
@@ -248,7 +343,10 @@ class WeatherWallpaperService : WallpaperService() {
                     }
                 }
                 WeatherType.CLOUDS, WeatherType.MIST -> {
-                    p.color = Color.argb(if (weatherType == WeatherType.MIST) 100 else 170, 220, 220, 230)
+                    p.color = Color.argb(
+                        if (weatherType == WeatherType.MIST) 100 else 170,
+                        220, 220, 230
+                    )
                     clouds.forEach { c ->
                         val s = c.scale
                         canvas.drawCircle(c.x, c.y, 55f * s, p)
