@@ -9,6 +9,7 @@ data class CurrentWeatherResponse(
     val weather: List<WeatherCondition>?,
     val main: MainWeather?,
     val wind: Wind?,
+    val visibility: Int?,
     val sys: Sys?,
     val name: String?,
     val dt: Long?,
@@ -87,3 +88,56 @@ fun Int.toWeatherType(): WeatherType = when (this) {
     in 801..804 -> WeatherType.CLOUDS
     else -> WeatherType.UNKNOWN
 }
+
+// --- Forecast ---
+data class ForecastResponse(
+    val list: List<ForecastItem>?,
+    val city: ForecastCity?
+)
+
+data class ForecastCity(
+    val name: String?,
+    val sunrise: Long?,
+    val sunset: Long?
+)
+
+data class ForecastItem(
+    val dt: Long,
+    val main: MainWeather?,
+    val weather: List<WeatherCondition>?,
+    val pop: Double?, // probability of precipitation 0-1
+    val wind: Wind?,
+    val visibility: Int?,
+    val dt_txt: String?
+)
+
+data class DailyForecastUi(
+    val dayLabel: String,
+    val dateLabel: String,
+    val iconCode: String,
+    val conditionId: Int,
+    val tempMax: Double,
+    val tempMin: Double,
+    val popPercent: Int
+)
+
+data class HourlyForecastUi(
+    val hourLabel: String,
+    val iconCode: String,
+    val conditionId: Int,
+    val temp: Double,
+    val popPercent: Int
+)
+
+data class WeatherDetailsUi(
+    val humidity: Int,
+    val windSpeed: Double,
+    val pressure: Int,
+    val visibilityKm: Double,
+    val feelsLike: Double,
+    val sunrise: Long,
+    val sunset: Long,
+    val description: String,
+    val daily: List<DailyForecastUi>,
+    val hourly: List<HourlyForecastUi>
+)

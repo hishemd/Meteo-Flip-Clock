@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0D0D15"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/tvDetailsCity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Daily forecast card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="#1A1A2E"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            android:layout_marginBottom="12dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="14dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="📅 Prévisions quotidiennes" android:textColor="#FFFFFF"
+                    android:textSize="15sp" android:textStyle="bold" android:layout_marginBottom="10dp" />
+                <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:scrollbars="none">
+                    <LinearLayout android:id="@+id/dailyContainer" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:orientation="horizontal" />
+                </HorizontalScrollView>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Hourly forecast -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="#1A1A2E"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            android:layout_marginBottom="12dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="14dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="🕐 Prévisions heure par heure" android:textColor="#FFFFFF"
+                    android:textSize="15sp" android:textStyle="bold" android:layout_marginBottom="10dp" />
+                <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:scrollbars="none">
+                    <LinearLayout android:id="@+id/hourlyContainer" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:orientation="horizontal" />
+                </HorizontalScrollView>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Grid of detail cards -->
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:alignmentMode="alignMargins"
+            android:useDefaultMargins="true">
+
+            <!-- Humidity -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp" android:layout_height="120dp"
+                android:layout_columnWeight="1"
+                app:cardBackgroundColor="#4A3A5A" app:cardCornerRadius="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:orientation="vertical" android:padding="12dp" android:gravity="center">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="💧 Humidité" android:textColor="#E0E0E0" android:textSize="13sp" />
+                    <TextView android:id="@+id/tvHumidity" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="--" android:textColor="#FFFFFF"
+                        android:textSize="28sp" android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Wind -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp" android:layout_height="120dp"
+                android:layout_columnWeight="1"
+                app:cardBackgroundColor="#1A1A2E" app:cardCornerRadius="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:orientation="vertical" android:padding="12dp" android:gravity="center">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="💨 Vent" android:textColor="#E0E0E0" android:textSize="13sp" />
+                    <TextView android:id="@+id/tvWind" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="--" android:textColor="#FFFFFF"
+                        android:textSize="24sp" android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Pressure -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp" android:layout_height="120dp"
+                android:layout_columnWeight="1"
+                app:cardBackgroundColor="#1A1A2E" app:cardCornerRadius="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:orientation="vertical" android:padding="12dp" android:gravity="center">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="⏱ Pression" android:textColor="#E0E0E0" android:textSize="13sp" />
+                    <TextView android:id="@+id/tvPressure" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="--" android:textColor="#FFFFFF"
+                        android:textSize="22sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="hPa" android:textColor="#B0BEC5" android:textSize="12sp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Visibility -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp" android:layout_height="120dp"
+                android:layout_columnWeight="1"
+                app:cardBackgroundColor="#3A2A4A" app:cardCornerRadius="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:orientation="vertical" android:padding="12dp" android:gravity="center">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="👁 Visibilité" android:textColor="#E0E0E0" android:textSize="13sp" />
+                    <TextView android:id="@+id/tvVisibility" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="--" android:textColor="#FFFFFF"
+                        android:textSize="24sp" android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Feels like -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp" android:layout_height="120dp"
+                android:layout_columnWeight="1"
+                app:cardBackgroundColor="#1A1A2E" app:cardCornerRadius="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:orientation="vertical" android:padding="12dp" android:gravity="center">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="🌡 Ressenti" android:textColor="#E0E0E0" android:textSize="13sp" />
+                    <TextView android:id="@+id/tvFeelsLike" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="--" android:textColor="#FFFFFF"
+                        android:textSize="26sp" android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Sun -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp" android:layout_height="120dp"
+                android:layout_columnWeight="1"
+                app:cardBackgroundColor="#1A1A2E" app:cardCornerRadius="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:orientation="vertical" android:padding="12dp" android:gravity="center">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="☀️ Soleil" android:textColor="#E0E0E0" android:textSize="13sp" />
+                    <TextView android:id="@+id/tvSunTimes" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="-- → --" android:textColor="#FFD54F"
+                        android:textSize="14sp" android:textStyle="bold" android:gravity="center" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </GridLayout>
+
+    </LinearLayout>
+</ScrollView>

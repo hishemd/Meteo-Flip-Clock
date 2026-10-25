@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="64dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="6dp"
+    android:layout_marginEnd="4dp">
+    <TextView android:id="@+id/tvDay" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#FFFFFF" android:textSize="12sp" android:textStyle="bold" />
+    <TextView android:id="@+id/tvDate" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#90A4AE" android:textSize="10sp" />
+    <TextView android:id="@+id/tvIcon" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textSize="22sp" android:layout_marginTop="4dp" />
+    <TextView android:id="@+id/tvMax" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold" android:layout_marginTop="2dp" />
+    <TextView android:id="@+id/tvMin" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#90A4AE" android:textSize="12sp" />
+    <TextView android:id="@+id/tvPop" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#64B5F6" android:textSize="10sp" android:layout_marginTop="2dp" />
+</LinearLayout>

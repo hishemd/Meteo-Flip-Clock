@@ -33,6 +33,8 @@
             android:parentActivityName=".ui.CityListActivity" android:theme="@style/Theme.HTCWeatherFlipClock" />
         <activity android:name=".ui.SettingsActivity" android:exported="false"
             android:parentActivityName=".ui.MainActivity" android:theme="@style/Theme.HTCWeatherFlipClock" />
+        <activity android:name=".ui.DetailsActivity" android:exported="false"
+            android:parentActivityName=".ui.MainActivity" android:theme="@style/Theme.HTCWeatherFlipClock" />
 
         <service
             android:name=".wallpaper.WeatherWallpaperService"

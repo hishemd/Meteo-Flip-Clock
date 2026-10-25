@@ -105,6 +105,9 @@ class MainActivity : AppCompatActivity() {
         binding.btnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+        binding.weatherCard.setOnClickListener {
+            startActivity(Intent(this, DetailsActivity::class.java))
+        }
     }
 
     override fun onResume() {
