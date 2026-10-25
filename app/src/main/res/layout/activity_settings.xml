@@ -21,6 +21,26 @@
             android:textStyle="bold"
             android:layout_marginBottom="24dp" />
 
+        <!-- GPS -->
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchGps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/use_gps"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            app:thumbTint="#4FC3F7"
+            app:trackTint="#546E7A"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/gps_help"
+            android:textColor="#78909C"
+            android:textSize="12sp"
+            android:layout_marginBottom="20dp" />
+
         <!-- API Key -->
         <TextView
             android:layout_width="wrap_content"
@@ -35,8 +55,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             app:boxBackgroundColor="#1A1A2E"
-            app:boxStrokeColor="#4FC3F7"
-            app:hintTextColor="#B0BEC5">
+            app:boxStrokeColor="#4FC3F7">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etApiKey"
@@ -45,7 +64,7 @@
                 android:hint="@string/api_key_hint"
                 android:inputType="text"
                 android:textColor="#FFFFFF"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
@@ -76,7 +95,7 @@
                 android:id="@+id/rbCelsius"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="°C"
+                android:text="°C Celsius"
                 android:textColor="#FFFFFF"
                 android:buttonTint="#4FC3F7"
                 android:layout_marginEnd="24dp" />
@@ -85,7 +104,7 @@
                 android:id="@+id/rbFahrenheit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="°F"
+                android:text="°F Fahrenheit"
                 android:textColor="#FFFFFF"
                 android:buttonTint="#4FC3F7" />
         </RadioGroup>
@@ -107,7 +126,7 @@
             android:padding="12dp"
             android:layout_marginBottom="24dp" />
 
-        <!-- Live Wallpaper button -->
+        <!-- Live Wallpaper -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSetWallpaper"
             android:layout_width="match_parent"
@@ -116,7 +135,7 @@
             android:textSize="15sp"
             app:backgroundTint="#1565C0"
             app:cornerRadius="12dp"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:layout_width="match_parent"
@@ -124,9 +143,17 @@
             android:text="@string/wallpaper_help"
             android:textColor="#78909C"
             android:textSize="12sp"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Widget tip -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="💡 Widget : appui long sur l\'écran d\'accueil → Widgets → Météo Flip Clock"
+            android:textColor="#90CAF9"
+            android:textSize="13sp"
             android:layout_marginBottom="24dp" />
 
-        <!-- Save -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSave"
             android:layout_width="match_parent"

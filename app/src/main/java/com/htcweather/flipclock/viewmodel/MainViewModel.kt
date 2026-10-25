@@ -12,6 +12,7 @@ import com.htcweather.flipclock.data.model.WeatherType
 import com.htcweather.flipclock.data.model.WeatherUiModel
 import com.htcweather.flipclock.data.model.toWeatherType
 import com.htcweather.flipclock.utils.AppPreferences
+import com.htcweather.flipclock.utils.LocationHelper
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -21,6 +22,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = WeatherRepository(AppDatabase.getInstance(application).cityDao())
     private val prefs = AppPreferences(application)
+    private val appContext = application
 
     private val _weather = MutableLiveData<WeatherUiModel?>()
     val weather: LiveData<WeatherUiModel?> = _weather
@@ -39,12 +41,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private var selectedCityId: Long? = null
 
-    fun loadWeather(cityId: Long? = null) {
+    fun loadWeather(cityId: Long? = null, forceGps: Boolean = false) {
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
 
             try {
+                // GPS first if enabled
+                if ((prefs.useGps || forceGps) && LocationHelper.hasPermission(appContext)) {
+                    val loc = LocationHelper.getLastLocation(appContext)
+                    if (loc != null) {
+                        prefs.lastLat = loc.latitude.toFloat()
+                        prefs.lastLon = loc.longitude.toFloat()
+                        fetchFor(loc.latitude, loc.longitude, "Ma position")
+                        return@launch
+                    }
+                }
+
                 val cities = repository.getAllCities().first()
                 val city = when {
                     cityId != null -> cities.find { it.id == cityId }
@@ -56,8 +69,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val default = CityEntity(
                         name = "Maison",
                         country = "FR",
-                        lat = 48.8566,
-                        lon = 2.3522,
+                        lat = prefs.lastLat.toDouble(),
+                        lon = prefs.lastLon.toDouble(),
                         isHome = true
                     )
                     val id = repository.addCity(default)
@@ -80,16 +93,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun fetchFor(lat: Double, lon: Double, fallbackName: String) {
         val result = repository.fetchWeather(lat, lon, prefs.apiKey)
         result.onSuccess { model ->
-            val display = if (fallbackName == "Maison") model.copy(cityName = "Maison") else model
+            val display = when {
+                fallbackName == "Maison" -> model.copy(cityName = "Maison")
+                fallbackName == "Ma position" -> model.copy(cityName = model.cityName.ifBlank { "Ma position" })
+                else -> model
+            }
             _weather.value = display
-            val type = display.conditionId.toWeatherType()
-            _weatherType.value = type
+            _weatherType.value = display.conditionId.toWeatherType()
 
-            // Save for Live Wallpaper
             prefs.lastLat = lat.toFloat()
             prefs.lastLon = lon.toFloat()
             prefs.lastConditionId = display.conditionId
             prefs.lastCityName = display.cityName
+            prefs.lastTemp = display.temperature.toFloat()
+            prefs.lastTempMax = display.tempMax.toFloat()
+            prefs.lastTempMin = display.tempMin.toFloat()
         }.onFailure {
             _error.value = it.message ?: "Impossible de récupérer la météo"
         }
@@ -97,6 +115,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun selectCity(city: CityEntity) {
         selectedCityId = city.id
+        prefs.useGps = false
         loadWeather(city.id)
     }
 
@@ -108,12 +127,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun formatTime(unix: Long): String {
         if (unix == 0L) return "--:--"
-        val sdf = SimpleDateFormat("H:mm", Locale.FRENCH)
-        return sdf.format(Date(unix * 1000))
+        return SimpleDateFormat("H:mm", Locale.FRENCH).format(Date(unix * 1000))
     }
 
     fun formatDate(): String {
-        val sdf = SimpleDateFormat("EEE d MMM", Locale.FRENCH)
-        return sdf.format(Date()).replaceFirstChar { it.uppercase() }
+        return SimpleDateFormat("EEE d MMM", Locale.FRENCH)
+            .format(Date()).replaceFirstChar { it.uppercase() }
     }
 }

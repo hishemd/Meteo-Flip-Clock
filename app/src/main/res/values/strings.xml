@@ -7,7 +7,7 @@
     <string name="search_city">Rechercher une ville…</string>
     <string name="save">Enregistrer</string>
     <string name="delete">Supprimer</string>
-    <string name="current_location">Position actuelle</string>
+    <string name="current_location">Position actuelle (GPS)</string>
     <string name="loading">Chargement…</string>
     <string name="error_network">Erreur réseau. Vérifiez votre connexion.</string>
     <string name="error_api">Impossible de récupérer la météo.</string>
@@ -21,11 +21,16 @@
     <string name="api_key_hint">Collez votre clé OpenWeatherMap</string>
     <string name="settings">Paramètres</string>
     <string name="api_key_label">Clé API météo (OpenWeatherMap)</string>
-    <string name="api_key_help">Créez une clé gratuite sur openweathermap.org/api — sans clé l\'app fonctionne en mode démo.</string>
+    <string name="api_key_help">Créez une clé gratuite sur openweathermap.org/api</string>
     <string name="temp_unit">Unité de température</string>
     <string name="auto_refresh">Actualisation automatique</string>
     <string name="set_live_wallpaper">Définir comme fond d\'écran animé</string>
     <string name="wallpaper_help">Le fond d\'écran change automatiquement selon la météo (style HTC Diamond).</string>
     <string name="wallpaper_description">Fond d\'écran animé synchronisé avec la météo – style HTC Sense / Diamond</string>
     <string name="settings_saved">Paramètres enregistrés</string>
+    <string name="use_gps">Utiliser le GPS (position actuelle)</string>
+    <string name="gps_help">Active le GPS pour afficher la météo de votre position réelle.</string>
+    <string name="widget_label">Météo Flip Clock</string>
+    <string name="widget_description">Widget horloge flip + météo style HTC Diamond</string>
+    <string name="location_permission">Autorisation de localisation nécessaire pour le GPS</string>
 </resources>
