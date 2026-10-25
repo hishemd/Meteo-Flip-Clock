@@ -13,7 +13,6 @@
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
-</resources>
 
     <style name="WidgetFlipDigit">
         <item name="android:layout_width">36dp</item>
@@ -25,3 +24,4 @@
         <item name="android:background">@drawable/widget_digit_bg</item>
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
+</resources>
