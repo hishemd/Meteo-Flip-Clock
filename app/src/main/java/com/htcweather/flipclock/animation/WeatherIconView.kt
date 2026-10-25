@@ -7,9 +7,10 @@ import android.view.View
 import com.htcweather.flipclock.data.model.WeatherType
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.random.Random
 
 /**
- * Animated weather icon in the style of classic HTC Sense (sun with rays, rain cloud, etc.)
+ * Icône météo animée style HTC Diamond (soleil brillant, nuage + pluie…).
  */
 class WeatherIconView @JvmOverloads constructor(
     context: Context,
@@ -21,44 +22,37 @@ class WeatherIconView @JvmOverloads constructor(
     private var rotationAngle = 0f
     private var pulse = 0f
     private var pulseDir = 1f
+    private val drops = mutableListOf<Pair<Float, Float>>()
 
-    private val sunPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#FFD54F")
-        style = Paint.Style.FILL
-    }
+    private val sunPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val rayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#FFECB3")
-        strokeWidth = 6f
         strokeCap = Paint.Cap.ROUND
+        style = Paint.Style.STROKE
+        strokeWidth = 5f
     }
     private val cloudPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#ECEFF1")
-        style = Paint.Style.FILL
     }
     private val rainPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#64B5F6")
-        strokeWidth = 4f
+        strokeWidth = 3.5f
         strokeCap = Paint.Cap.ROUND
     }
     private val snowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        style = Paint.Style.FILL
     }
-
-    private val drops = mutableListOf<Pair<Float, Float>>()
 
     private val animRunnable = object : Runnable {
         override fun run() {
-            rotationAngle = (rotationAngle + 0.8f) % 360f
-            pulse += 0.04f * pulseDir
+            rotationAngle = (rotationAngle + 0.6f) % 360f
+            pulse += 0.035f * pulseDir
             if (pulse > 1f) pulseDir = -1f
             if (pulse < 0f) pulseDir = 1f
-
-            // animate rain/snow positions
             for (i in drops.indices) {
                 val (x, y) = drops[i]
-                drops[i] = x to (y + 4f)
-                if (y > height) drops[i] = x to -10f
+                var ny = y + 3.5f
+                if (ny > height) ny = -8f
+                drops[i] = x to ny
             }
             invalidate()
             postDelayed(this, 16)
@@ -69,13 +63,9 @@ class WeatherIconView @JvmOverloads constructor(
         weatherType = type
         drops.clear()
         if (type == WeatherType.RAIN || type == WeatherType.DRIZZLE || type == WeatherType.THUNDERSTORM) {
-            repeat(8) {
-                drops.add((20f + it * 12f) to (Random.nextFloat() * 40f))
-            }
+            repeat(10) { drops.add((12f + it * 9f) to (Random.nextFloat() * 50f)) }
         } else if (type == WeatherType.SNOW) {
-            repeat(10) {
-                drops.add((15f + it * 10f) to (Random.nextFloat() * 50f))
-            }
+            repeat(12) { drops.add((10f + it * 8f) to (Random.nextFloat() * 55f)) }
         }
         invalidate()
     }
@@ -94,36 +84,39 @@ class WeatherIconView @JvmOverloads constructor(
         super.onDraw(canvas)
         val cx = width / 2f
         val cy = height / 2f
-        val radius = minOf(width, height) * 0.28f
+        val radius = minOf(width, height) * 0.30f
 
         when (weatherType) {
             WeatherType.CLEAR -> drawSun(canvas, cx, cy, radius)
-            WeatherType.CLOUDS -> drawCloud(canvas, cx, cy, radius * 1.3f)
+            WeatherType.CLOUDS -> drawCloud(canvas, cx, cy, radius * 1.25f)
             WeatherType.RAIN, WeatherType.DRIZZLE -> {
-                drawCloud(canvas, cx, cy - 10f, radius * 1.1f)
+                drawCloud(canvas, cx, cy - 12f, radius * 1.05f)
                 drawRain(canvas)
             }
             WeatherType.THUNDERSTORM -> {
-                drawCloud(canvas, cx, cy - 10f, radius * 1.1f)
+                drawCloud(canvas, cx, cy - 12f, radius * 1.05f)
                 drawRain(canvas)
-                // simple lightning bolt
+                // lightning bolt
                 val bolt = Path().apply {
-                    moveTo(cx + 10, cy - 20)
-                    lineTo(cx - 5, cy + 5)
-                    lineTo(cx + 8, cy + 5)
-                    lineTo(cx - 10, cy + 30)
+                    moveTo(cx + 8, cy - 18)
+                    lineTo(cx - 6, cy + 2)
+                    lineTo(cx + 6, cy + 2)
+                    lineTo(cx - 8, cy + 28)
                 }
-                sunPaint.color = Color.parseColor("#FFEB3B")
+                sunPaint.color = Color.parseColor("#FFEE58")
+                sunPaint.shader = null
                 canvas.drawPath(bolt, sunPaint)
-                sunPaint.color = Color.parseColor("#FFD54F")
             }
             WeatherType.SNOW -> {
-                drawCloud(canvas, cx, cy - 15f, radius * 1.1f)
-                drawSnow(canvas)
+                drawCloud(canvas, cx, cy - 14f, radius * 1.05f)
+                drops.forEach { (x, y) ->
+                    snowPaint.color = Color.WHITE
+                    canvas.drawCircle(x, y, 3.5f, snowPaint)
+                }
             }
             WeatherType.MIST -> {
-                cloudPaint.alpha = 120
-                drawCloud(canvas, cx, cy, radius * 1.4f)
+                cloudPaint.alpha = 110
+                drawCloud(canvas, cx, cy, radius * 1.35f)
                 cloudPaint.alpha = 255
             }
             else -> drawSun(canvas, cx, cy, radius)
@@ -131,57 +124,51 @@ class WeatherIconView @JvmOverloads constructor(
     }
 
     private fun drawSun(canvas: Canvas, cx: Float, cy: Float, radius: Float) {
+        // Glow
+        for (i in 3 downTo 1) {
+            sunPaint.shader = RadialGradient(
+                cx, cy, radius * (1.3f + i * 0.4f),
+                intArrayOf(Color.argb(25 + i * 8, 255, 200, 80), Color.TRANSPARENT),
+                null, Shader.TileMode.CLAMP
+            )
+            canvas.drawCircle(cx, cy, radius * (1.3f + i * 0.4f), sunPaint)
+        }
         // Rays
+        rayPaint.color = Color.argb(180, 255, 220, 130)
         canvas.save()
         canvas.rotate(rotationAngle, cx, cy)
-        for (i in 0 until 8) {
-            val angle = Math.toRadians((i * 45).toDouble())
-            val startR = radius * 1.3f
-            val endR = radius * (1.7f + pulse * 0.15f)
+        for (i in 0 until 10) {
+            val a = Math.toRadians((i * 36).toDouble())
+            val s = radius * 1.28f
+            val e = radius * (1.65f + pulse * 0.12f)
             canvas.drawLine(
-                cx + (cos(angle) * startR).toFloat(),
-                cy + (sin(angle) * startR).toFloat(),
-                cx + (cos(angle) * endR).toFloat(),
-                cy + (sin(angle) * endR).toFloat(),
+                cx + (cos(a) * s).toFloat(), cy + (sin(a) * s).toFloat(),
+                cx + (cos(a) * e).toFloat(), cy + (sin(a) * e).toFloat(),
                 rayPaint
             )
         }
         canvas.restore()
-
-        // Glow
-        val glow = RadialGradient(
-            cx, cy, radius * 1.6f,
-            intArrayOf(Color.argb(80, 255, 213, 79), Color.TRANSPARENT),
-            null, Shader.TileMode.CLAMP
-        )
-        val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { shader = glow }
-        canvas.drawCircle(cx, cy, radius * 1.6f, glowPaint)
-
         // Core
+        sunPaint.shader = RadialGradient(
+            cx - radius * 0.2f, cy - radius * 0.2f, radius,
+            intArrayOf(Color.parseColor("#FFF59D"), Color.parseColor("#FFD54F"), Color.parseColor("#FFA000")),
+            floatArrayOf(0f, 0.5f, 1f), Shader.TileMode.CLAMP
+        )
         canvas.drawCircle(cx, cy, radius, sunPaint)
+        sunPaint.shader = null
     }
 
     private fun drawCloud(canvas: Canvas, cx: Float, cy: Float, size: Float) {
-        canvas.drawCircle(cx - size * 0.35f, cy, size * 0.45f, cloudPaint)
-        canvas.drawCircle(cx + size * 0.3f, cy - size * 0.1f, size * 0.4f, cloudPaint)
-        canvas.drawCircle(cx, cy - size * 0.25f, size * 0.5f, cloudPaint)
-        canvas.drawCircle(cx + size * 0.1f, cy + size * 0.15f, size * 0.42f, cloudPaint)
+        canvas.drawCircle(cx - size * 0.32f, cy, size * 0.42f, cloudPaint)
+        canvas.drawCircle(cx + size * 0.28f, cy - size * 0.08f, size * 0.38f, cloudPaint)
+        canvas.drawCircle(cx, cy - size * 0.22f, size * 0.48f, cloudPaint)
+        canvas.drawCircle(cx + size * 0.08f, cy + size * 0.14f, size * 0.40f, cloudPaint)
+        canvas.drawCircle(cx - size * 0.08f, cy + size * 0.1f, size * 0.36f, cloudPaint)
     }
 
     private fun drawRain(canvas: Canvas) {
         drops.forEach { (x, y) ->
-            canvas.drawLine(x, y, x - 2f, y + 14f, rainPaint)
+            canvas.drawLine(x, y, x - 1.5f, y + 12f, rainPaint)
         }
-    }
-
-    private fun drawSnow(canvas: Canvas) {
-        drops.forEach { (x, y) ->
-            canvas.drawCircle(x, y, 4f, snowPaint)
-        }
-    }
-
-    private object Random {
-        private val r = java.util.Random()
-        fun nextFloat() = r.nextFloat()
     }
 }
