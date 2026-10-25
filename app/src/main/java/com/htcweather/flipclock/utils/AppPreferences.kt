@@ -9,7 +9,7 @@ class AppPreferences(context: Context) {
         context.getSharedPreferences("htc_weather_prefs", Context.MODE_PRIVATE)
 
     var apiKey: String
-        get() = prefs.getString(KEY_API, "") ?: ""
+        get() = prefs.getString(KEY_API, "")?.ifBlank { null } ?: com.htcweather.flipclock.data.remote.RetrofitClient.DEFAULT_API_KEY
         set(value) = prefs.edit().putString(KEY_API, value.trim()).apply()
 
     var useCelsius: Boolean

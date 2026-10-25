@@ -10,7 +10,8 @@ object RetrofitClient {
 
     private const val BASE_URL = "https://api.openweathermap.org/"
 
-    // Default demo key placeholder – user sets real key in Settings
+    // Clé OpenWeatherMap (peut être modifiée dans Paramètres)
+    const val DEFAULT_API_KEY = "7b0f7e2b4a5f78ad9795d66574fb1b9c"
     const val DEFAULT_PLACEHOLDER = "YOUR_OPENWEATHERMAP_API_KEY"
 
     private val logging = HttpLoggingInterceptor().apply {

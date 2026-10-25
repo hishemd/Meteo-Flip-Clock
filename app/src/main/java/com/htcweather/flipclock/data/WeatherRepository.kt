@@ -17,7 +17,7 @@ class WeatherRepository(private val cityDao: CityDao) {
 
     suspend fun fetchWeather(lat: Double, lon: Double, apiKey: String): Result<WeatherUiModel> {
         return try {
-            val key = apiKey.ifBlank { RetrofitClient.DEFAULT_PLACEHOLDER }
+            val key = apiKey.ifBlank { RetrofitClient.DEFAULT_API_KEY }
             if (key == RetrofitClient.DEFAULT_PLACEHOLDER || key.isBlank()) {
                 return Result.success(createDemoWeather())
             }
@@ -57,7 +57,7 @@ class WeatherRepository(private val cityDao: CityDao) {
 
     suspend fun searchCities(query: String, apiKey: String): Result<List<GeoResult>> {
         return try {
-            val key = apiKey.ifBlank { RetrofitClient.DEFAULT_PLACEHOLDER }
+            val key = apiKey.ifBlank { RetrofitClient.DEFAULT_API_KEY }
             if (key == RetrofitClient.DEFAULT_PLACEHOLDER || key.isBlank()) {
                 return Result.success(
                     listOf(
