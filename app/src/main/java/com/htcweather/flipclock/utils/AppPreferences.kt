@@ -25,6 +25,10 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_GPS, true)
         set(value) = prefs.edit().putBoolean(KEY_GPS, value).apply()
 
+    var language: String
+        get() = prefs.getString(KEY_LANG, "fr") ?: "fr"
+        set(value) = prefs.edit().putString(KEY_LANG, value).apply()
+
     var showSeconds: Boolean
         get() = prefs.getBoolean(KEY_SECONDS, false)
         set(value) = prefs.edit().putBoolean(KEY_SECONDS, value).apply()
@@ -62,6 +66,7 @@ class AppPreferences(context: Context) {
         private const val KEY_CELSIUS = "use_celsius"
         private const val KEY_REFRESH = "auto_refresh"
         private const val KEY_GPS = "use_gps"
+        private const val KEY_LANG = "language"
         private const val KEY_SECONDS = "show_seconds"
         private const val KEY_LAT = "last_lat"
         private const val KEY_LON = "last_lon"

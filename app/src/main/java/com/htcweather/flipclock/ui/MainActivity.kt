@@ -16,6 +16,8 @@ import com.htcweather.flipclock.databinding.ActivityMainBinding
 import com.htcweather.flipclock.utils.AppPreferences
 import com.htcweather.flipclock.viewmodel.MainViewModel
 import java.util.*
+import android.content.res.Configuration
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         prefs = AppPreferences(this)
+        applySavedLocale()
 
         setupObservers()
         setupButtons()
@@ -106,9 +109,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // reload in case settings changed
         if (::prefs.isInitialized) {
             viewModel.loadWeather(forceGps = prefs.useGps)
         }
+    }
+
+    private fun applySavedLocale() {
+        val lang = prefs.language
+        val locale = Locale(lang)
+        Locale.setDefault(locale)
+        val config = Configuration(resources.configuration)
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
     }
 }

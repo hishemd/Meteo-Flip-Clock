@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HTC Diamond Weather Clock</string>
+    <string name="home">Home</string>
+    <string name="add_city">Add city</string>
+    <string name="cities">Cities</string>
+    <string name="search_city">Search city…</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="current_location">Current location (GPS)</string>
+    <string name="loading">Loading…</string>
+    <string name="error_network">Network error. Check your connection.</string>
+    <string name="error_api">Unable to fetch weather.</string>
+    <string name="sunrise">Sunrise</string>
+    <string name="sunset">Sunset</string>
+    <string name="settings">Settings</string>
+    <string name="api_key_label">Weather API key (OpenWeatherMap)</string>
+    <string name="api_key_hint">Paste your OpenWeatherMap key</string>
+    <string name="api_key_help">Free key at openweathermap.org/api</string>
+    <string name="temp_unit">Temperature unit</string>
+    <string name="auto_refresh">Auto refresh</string>
+    <string name="set_live_wallpaper">Set live wallpaper</string>
+    <string name="wallpaper_help">Background synced with weather – HTC Diamond style</string>
+    <string name="wallpaper_description">Animated weather wallpaper HTC Sense style</string>
+    <string name="settings_saved">Settings saved</string>
+    <string name="use_gps">Use GPS</string>
+    <string name="gps_help">Show weather for your current location</string>
+    <string name="language">Language</string>
+    <string name="widget1_label">Flip Clock + Weather</string>
+    <string name="widget1_desc">Large flip clock with weather</string>
+    <string name="widget2_label">Flip Clock</string>
+    <string name="widget2_desc">Large flip clock only</string>
+    <string name="widget3_label">Compact Weather</string>
+    <string name="widget3_desc">Compact weather widget</string>
+    <string name="widget4_label">Vertical Weather</string>
+    <string name="widget4_desc">Vertical clock + weather widget</string>
+</resources>

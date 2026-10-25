@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Météo Flip Clock</string>
+    <string name="app_name">HTC Diamond Weather Clock</string>
     <string name="home">Maison</string>
     <string name="add_city">Ajouter une ville</string>
     <string name="cities">Villes</string>
@@ -13,34 +13,25 @@
     <string name="error_api">Impossible de récupérer la météo.</string>
     <string name="sunrise">Lever du soleil</string>
     <string name="sunset">Coucher du soleil</string>
-    <string name="high_low">%1$s° / %2$s°</string>
-    <string name="feels_like">Ressenti %1$s°</string>
-    <string name="humidity">Humidité %1$d%%</string>
-    <string name="wind">Vent %1$.1f km/h</string>
-    <string name="no_cities">Aucune ville. Ajoutez-en une !</string>
-    <string name="api_key_hint">Collez votre clé OpenWeatherMap</string>
     <string name="settings">Paramètres</string>
     <string name="api_key_label">Clé API météo (OpenWeatherMap)</string>
-    <string name="api_key_help">Créez une clé gratuite sur openweathermap.org/api</string>
+    <string name="api_key_hint">Collez votre clé OpenWeatherMap</string>
+    <string name="api_key_help">Clé gratuite sur openweathermap.org/api</string>
     <string name="temp_unit">Unité de température</string>
     <string name="auto_refresh">Actualisation automatique</string>
-    <string name="set_live_wallpaper">Définir comme fond d\'écran animé</string>
-    <string name="wallpaper_help">Le fond d\'écran change automatiquement selon la météo (style HTC Diamond).</string>
-    <string name="wallpaper_description">Fond d\'écran animé synchronisé avec la météo – style HTC Sense / Diamond</string>
+    <string name="set_live_wallpaper">Fond d\'écran animé</string>
+    <string name="wallpaper_help">Fond synchronisé avec la météo – style HTC Diamond</string>
+    <string name="wallpaper_description">Fond d\'écran animé météo style HTC Sense</string>
     <string name="settings_saved">Paramètres enregistrés</string>
-    <string name="use_gps">Utiliser le GPS (position actuelle)</string>
-    <string name="gps_help">Active le GPS pour afficher la météo de votre position réelle.</string>
-    <string name="widget_label">Météo Flip Clock</string>
-    <string name="widget_description">Widget horloge flip + météo style HTC Diamond</string>
-    <string name="location_permission">Autorisation de localisation nécessaire pour le GPS</string>
-
+    <string name="use_gps">Utiliser le GPS</string>
+    <string name="gps_help">Affiche la météo de votre position</string>
+    <string name="language">Langue</string>
     <string name="widget1_label">Flip Clock + Météo</string>
-    <string name="widget1_desc">Grande horloge flip avec météo – style HTC</string>
+    <string name="widget1_desc">Grande horloge flip avec météo</string>
     <string name="widget2_label">Horloge Flip</string>
     <string name="widget2_desc">Grande horloge flip uniquement</string>
     <string name="widget3_label">Météo Compacte</string>
     <string name="widget3_desc">Widget météo compact</string>
     <string name="widget4_label">Météo Verticale</string>
     <string name="widget4_desc">Widget vertical horloge + météo</string>
-
 </resources>

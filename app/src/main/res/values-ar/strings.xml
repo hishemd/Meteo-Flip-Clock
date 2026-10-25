@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HTC Diamond Weather Clock</string>
+    <string name="home">المنزل</string>
+    <string name="add_city">إضافة مدينة</string>
+    <string name="cities">المدن</string>
+    <string name="search_city">ابحث عن مدينة…</string>
+    <string name="save">حفظ</string>
+    <string name="delete">حذف</string>
+    <string name="current_location">الموقع الحالي (GPS)</string>
+    <string name="loading">جاري التحميل…</string>
+    <string name="error_network">خطأ في الشبكة. تحقق من الاتصال.</string>
+    <string name="error_api">تعذر جلب الطقس.</string>
+    <string name="sunrise">شروق الشمس</string>
+    <string name="sunset">غروب الشمس</string>
+    <string name="settings">الإعدادات</string>
+    <string name="api_key_label">مفتاح API الطقس (OpenWeatherMap)</string>
+    <string name="api_key_hint">الصق مفتاح OpenWeatherMap</string>
+    <string name="api_key_help">مفتاح مجاني من openweathermap.org/api</string>
+    <string name="temp_unit">وحدة الحرارة</string>
+    <string name="auto_refresh">تحديث تلقائي</string>
+    <string name="set_live_wallpaper">تعيين خلفية متحركة</string>
+    <string name="wallpaper_help">خلفية متزامنة مع الطقس – أسلوب HTC Diamond</string>
+    <string name="wallpaper_description">خلفية طقس متحركة بأسلوب HTC Sense</string>
+    <string name="settings_saved">تم حفظ الإعدادات</string>
+    <string name="use_gps">استخدام GPS</string>
+    <string name="gps_help">عرض طقس موقعك الحالي</string>
+    <string name="language">اللغة</string>
+    <string name="widget1_label">ساعة Flip + طقس</string>
+    <string name="widget1_desc">ساعة flip كبيرة مع الطقس</string>
+    <string name="widget2_label">ساعة Flip</string>
+    <string name="widget2_desc">ساعة flip كبيرة فقط</string>
+    <string name="widget3_label">طقس مضغوط</string>
+    <string name="widget3_desc">ودجت طقس مضغوط</string>
+    <string name="widget4_label">طقس عمودي</string>
+    <string name="widget4_desc">ودجت عمودي ساعة + طقس</string>
+</resources>
