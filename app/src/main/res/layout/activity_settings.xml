@@ -144,6 +144,17 @@
             android:padding="12dp"
             android:layout_marginBottom="24dp" />
 
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPreviewWeather"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="🎬 Prévisualiser les fonds météo (hors ligne)"
+            android:textSize="14sp"
+            app:backgroundTint="#6A1B9A"
+            app:cornerRadius="12dp"
+            android:layout_marginBottom="12dp" />
+
         <!-- Live Wallpaper -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSetWallpaper"

@@ -35,6 +35,10 @@
             android:parentActivityName=".ui.MainActivity" android:theme="@style/Theme.HTCWeatherFlipClock" />
         <activity android:name=".ui.DetailsActivity" android:exported="false"
             android:parentActivityName=".ui.MainActivity" android:theme="@style/Theme.HTCWeatherFlipClock" />
+        <activity android:name=".ui.WeatherPreviewActivity" android:exported="false"
+            android:parentActivityName=".ui.MainActivity"
+            android:theme="@style/Theme.HTCWeatherFlipClock.Fullscreen"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".wallpaper.WeatherWallpaperService"

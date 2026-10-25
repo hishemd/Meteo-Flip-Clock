@@ -47,6 +47,9 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.btnSave.setOnClickListener { save() }
         binding.btnSetWallpaper.setOnClickListener { openLiveWallpaperPicker() }
+        binding.btnPreviewWeather.setOnClickListener {
+            startActivity(Intent(this, WeatherPreviewActivity::class.java))
+        }
     }
 
     private fun loadCurrent() {
