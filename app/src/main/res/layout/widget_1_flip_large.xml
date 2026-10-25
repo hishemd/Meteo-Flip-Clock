@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="vertical"
+    android:padding="14dp"
+    android:gravity="center">
+
+    <!-- Large Flip Clock -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="12dp">
+
+        <TextView android:id="@+id/h1" style="@style/FlipDigitLarge" android:text="0" />
+        <TextView android:id="@+id/h2" style="@style/FlipDigitLarge" android:text="0" android:layout_marginStart="6dp" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text=":" android:textColor="#FFFFFF" android:textSize="42sp" android:textStyle="bold"
+            android:layout_marginStart="8dp" android:layout_marginEnd="8dp" android:layout_gravity="center_vertical" />
+        <TextView android:id="@+id/m1" style="@style/FlipDigitLarge" android:text="0" />
+        <TextView android:id="@+id/m2" style="@style/FlipDigitLarge" android:text="0" android:layout_marginStart="6dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/widget_card_bg"
+        android:padding="12dp">
+
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical">
+            <TextView android:id="@+id/city" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold" android:text="Maison" />
+            <TextView android:id="@+id/temp" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#FFFFFF" android:textSize="28sp" android:textStyle="bold" android:text="--°C" />
+            <TextView android:id="@+id/highLow" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#B0BEC5" android:textSize="12sp" android:text="-- / --" />
+        </LinearLayout>
+
+        <TextView android:id="@+id/icon" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textSize="44sp" android:text="☀️" android:layout_marginEnd="8dp" />
+
+        <TextView android:id="@+id/date" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="#B0BEC5" android:textSize="12sp" android:gravity="end" android:text="" />
+    </LinearLayout>
+</LinearLayout>

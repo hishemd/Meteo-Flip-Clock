@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView android:id="@+id/h1" style="@style/FlipDigitXLarge" android:text="0" />
+        <TextView android:id="@+id/h2" style="@style/FlipDigitXLarge" android:text="0" android:layout_marginStart="8dp" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text=":" android:textColor="#FFFFFF" android:textSize="52sp" android:textStyle="bold"
+            android:layout_marginStart="10dp" android:layout_marginEnd="10dp" android:layout_gravity="center_vertical" />
+        <TextView android:id="@+id/m1" style="@style/FlipDigitXLarge" android:text="0" />
+        <TextView android:id="@+id/m2" style="@style/FlipDigitXLarge" android:text="0" android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <TextView android:id="@+id/date" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#B0BEC5" android:textSize="14sp" android:layout_marginTop="10dp" android:text="" />
+</LinearLayout>

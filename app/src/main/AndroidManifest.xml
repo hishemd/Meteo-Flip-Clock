@@ -27,23 +27,12 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".ui.CityListActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.MainActivity"
-            android:theme="@style/Theme.HTCWeatherFlipClock" />
-
-        <activity
-            android:name=".ui.AddCityActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.CityListActivity"
-            android:theme="@style/Theme.HTCWeatherFlipClock" />
-
-        <activity
-            android:name=".ui.SettingsActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.MainActivity"
-            android:theme="@style/Theme.HTCWeatherFlipClock" />
+        <activity android:name=".ui.CityListActivity" android:exported="false"
+            android:parentActivityName=".ui.MainActivity" android:theme="@style/Theme.HTCWeatherFlipClock" />
+        <activity android:name=".ui.AddCityActivity" android:exported="false"
+            android:parentActivityName=".ui.CityListActivity" android:theme="@style/Theme.HTCWeatherFlipClock" />
+        <activity android:name=".ui.SettingsActivity" android:exported="false"
+            android:parentActivityName=".ui.MainActivity" android:theme="@style/Theme.HTCWeatherFlipClock" />
 
         <service
             android:name=".wallpaper.WeatherWallpaperService"
@@ -53,22 +42,47 @@
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
             </intent-filter>
-            <meta-data
-                android:name="android.service.wallpaper"
-                android:resource="@xml/wallpaper" />
+            <meta-data android:name="android.service.wallpaper" android:resource="@xml/wallpaper" />
         </service>
 
-        <!-- Home screen widget -->
-        <receiver
-            android:name=".widget.WeatherFlipWidget"
-            android:exported="true"
-            android:label="@string/widget_label">
+        <!-- Widget 1: Large Flip + Weather -->
+        <receiver android:name=".widget.Widget1FlipLarge" android:exported="true"
+            android:label="@string/widget1_label">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/weather_flip_widget_info" />
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_1_info" />
+        </receiver>
+
+        <!-- Widget 2: Clock only -->
+        <receiver android:name=".widget.Widget2ClockOnly" android:exported="true"
+            android:label="@string/widget2_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_2_info" />
+        </receiver>
+
+        <!-- Widget 3: Compact weather -->
+        <receiver android:name=".widget.Widget3Compact" android:exported="true"
+            android:label="@string/widget3_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_3_info" />
+        </receiver>
+
+        <!-- Widget 4: Tall vertical -->
+        <receiver android:name=".widget.Widget4Tall" android:exported="true"
+            android:label="@string/widget4_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_4_info" />
         </receiver>
 
     </application>

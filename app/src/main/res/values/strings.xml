@@ -33,4 +33,14 @@
     <string name="widget_label">Météo Flip Clock</string>
     <string name="widget_description">Widget horloge flip + météo style HTC Diamond</string>
     <string name="location_permission">Autorisation de localisation nécessaire pour le GPS</string>
+
+    <string name="widget1_label">Flip Clock + Météo</string>
+    <string name="widget1_desc">Grande horloge flip avec météo – style HTC</string>
+    <string name="widget2_label">Horloge Flip</string>
+    <string name="widget2_desc">Grande horloge flip uniquement</string>
+    <string name="widget3_label">Météo Compacte</string>
+    <string name="widget3_desc">Widget météo compact</string>
+    <string name="widget4_label">Météo Verticale</string>
+    <string name="widget4_desc">Widget vertical horloge + météo</string>
+
 </resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="vertical"
+    android:padding="14dp"
+    android:gravity="center">
+
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center" android:layout_marginBottom="14dp">
+        <TextView android:id="@+id/h1" style="@style/FlipDigitLarge" android:text="0" />
+        <TextView android:id="@+id/h2" style="@style/FlipDigitLarge" android:text="0" android:layout_marginStart="5dp" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text=":" android:textColor="#FFFFFF" android:textSize="36sp" android:textStyle="bold"
+            android:layout_marginStart="6dp" android:layout_marginEnd="6dp" android:layout_gravity="center_vertical" />
+        <TextView android:id="@+id/m1" style="@style/FlipDigitLarge" android:text="0" />
+        <TextView android:id="@+id/m2" style="@style/FlipDigitLarge" android:text="0" android:layout_marginStart="5dp" />
+    </LinearLayout>
+
+    <TextView android:id="@+id/icon" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textSize="52sp" android:text="☀️" android:layout_marginBottom="8dp" />
+
+    <TextView android:id="@+id/temp" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#FFFFFF" android:textSize="32sp" android:textStyle="bold" android:text="--°C" />
+
+    <TextView android:id="@+id/city" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#B0BEC5" android:textSize="14sp" android:layout_marginTop="4dp" android:text="Maison" />
+
+    <TextView android:id="@+id/highLow" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#78909C" android:textSize="12sp" android:layout_marginTop="2dp" android:text="-- / --" />
+
+    <TextView android:id="@+id/date" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#78909C" android:textSize="12sp" android:layout_marginTop="8dp" android:text="" />
+</LinearLayout>
