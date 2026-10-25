@@ -233,31 +233,98 @@ class WeatherBackgroundView @JvmOverloads constructor(
     }
 
     private fun drawBg(canvas: Canvas) {
+        // Realistic day / night sky gradients
         val colors = when (weatherType) {
             WeatherType.CLEAR -> if (isDay)
-                intArrayOf(0xFF071428.toInt(), 0xFF0C2A4A.toInt(), 0xFF154A72.toInt(), 0xFF1E6A8C.toInt())
+                // Real clear day: deep zenith blue → horizon lighter cyan
+                intArrayOf(0xFF1A6BB5.toInt(), 0xFF3A8FD0.toInt(), 0xFF6BB5E8.toInt(), 0xFFA8D4F0.toInt())
             else
-                intArrayOf(0xFF030308.toInt(), 0xFF0A0A18.toInt(), 0xFF12122A.toInt(), 0xFF1A1A38.toInt())
-            WeatherType.CLOUDS -> intArrayOf(0xFF1A2030.toInt(), 0xFF283040.toInt(), 0xFF384050.toInt(), 0xFF485060.toInt())
-            WeatherType.MIST -> intArrayOf(0xFF2A2A35.toInt(), 0xFF3A3A48.toInt(), 0xFF4A4A58.toInt(), 0xFF5A5A68.toInt())
-            WeatherType.RAIN, WeatherType.DRIZZLE -> intArrayOf(0xFF0A1020.toInt(), 0xFF121C32.toInt(), 0xFF1A2A48.toInt(), 0xFF223858.toInt())
-            WeatherType.THUNDERSTORM -> intArrayOf(0xFF06060C.toInt(), 0xFF0E0E16.toInt(), 0xFF16161E.toInt(), 0xFF1E1E28.toInt())
-            WeatherType.SNOW -> intArrayOf(0xFF1A2430.toInt(), 0xFF2A3848.toInt(), 0xFF3A4C5C.toInt(), 0xFF4A6070.toInt())
-            else -> intArrayOf(0xFF0D1520.toInt(), 0xFF152030.toInt(), 0xFF1A2A40.toInt(), 0xFF203050.toInt())
+                // Real clear night: near-black → deep navy → slight horizon glow
+                intArrayOf(0xFF020208.toInt(), 0xFF0A0E1C.toInt(), 0xFF12182C.toInt(), 0xFF1A2238.toInt())
+            WeatherType.CLOUDS -> if (isDay)
+                intArrayOf(0xFF5A7A98.toInt(), 0xFF6A8AA8.toInt(), 0xFF8AA8C0.toInt(), 0xFFA8C0D0.toInt())
+            else
+                intArrayOf(0xFF0C1018.toInt(), 0xFF161C28.toInt(), 0xFF222A38.toInt(), 0xFF2E3648.toInt())
+            WeatherType.MIST -> if (isDay)
+                intArrayOf(0xFF8A9AAA.toInt(), 0xFF9AAABA.toInt(), 0xFFB0C0C8.toInt(), 0xFFC8D4D8.toInt())
+            else
+                intArrayOf(0xFF1A1E28.toInt(), 0xFF2A3040.toInt(), 0xFF3A4250.toInt(), 0xFF4A5260.toInt())
+            WeatherType.RAIN, WeatherType.DRIZZLE -> if (isDay)
+                intArrayOf(0xFF3A5068.toInt(), 0xFF4A6078.toInt(), 0xFF5A7890.toInt(), 0xFF6A88A0.toInt())
+            else
+                intArrayOf(0xFF080C14.toInt(), 0xFF101820.toInt(), 0xFF182028.toInt(), 0xFF203040.toInt())
+            WeatherType.THUNDERSTORM -> if (isDay)
+                intArrayOf(0xFF2A3040.toInt(), 0xFF3A4050.toInt(), 0xFF4A5060.toInt(), 0xFF5A6070.toInt())
+            else
+                intArrayOf(0xFF040408.toInt(), 0xFF0A0A10.toInt(), 0xFF121218.toInt(), 0xFF1A1A22.toInt())
+            WeatherType.SNOW -> if (isDay)
+                intArrayOf(0xFF6A8098.toInt(), 0xFF8098B0.toInt(), 0xFFA0B8C8.toInt(), 0xFFC0D0DC.toInt())
+            else
+                intArrayOf(0xFF0C1420.toInt(), 0xFF182430.toInt(), 0xFF283848.toInt(), 0xFF384858.toInt())
+            else -> if (isDay)
+                intArrayOf(0xFF4A6A88.toInt(), 0xFF5A7A98.toInt(), 0xFF7A9AB0.toInt(), 0xFF9AB8C8.toInt())
+            else
+                intArrayOf(0xFF080C18.toInt(), 0xFF101828.toInt(), 0xFF1A2438.toInt(), 0xFF243048.toInt())
         }
         p.shader = LinearGradient(0f, 0f, 0f, height.toFloat(), colors,
-            floatArrayOf(0f, 0.35f, 0.7f, 1f), Shader.TileMode.CLAMP)
+            floatArrayOf(0f, 0.3f, 0.65f, 1f), Shader.TileMode.CLAMP)
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), p)
         p.shader = null
+
+        // Night: draw stars for clear / partly clear
+        if (!isDay && (weatherType == WeatherType.CLEAR || weatherType == WeatherType.UNKNOWN)) {
+            drawStars(canvas)
+        }
+    }
+
+    private val starSeed = 42
+    private fun drawStars(canvas: Canvas) {
+        val rnd = java.util.Random(starSeed.toLong())
+        val w = width.toFloat()
+        val h = height.toFloat() * 0.75f
+        for (i in 0 until 80) {
+            val x = rnd.nextFloat() * w
+            val y = rnd.nextFloat() * h
+            val size = 0.8f + rnd.nextFloat() * 1.8f
+            val twinkle = 0.5f + 0.5f * kotlin.math.sin(time * (2f + rnd.nextFloat() * 3f) + i)
+            val alpha = (120 + 100 * twinkle).toInt().coerceIn(40, 220)
+            p.color = android.graphics.Color.argb(alpha, 255, 255, 255)
+            canvas.drawCircle(x, y, size, p)
+        }
+        // moon for clear night
+        if (weatherType == WeatherType.CLEAR) {
+            val mx = width * 0.75f
+            val my = height * 0.22f
+            val mr = width * 0.10f
+            // moon glow
+            p.shader = RadialGradient(mx, my, mr * 2.2f,
+                intArrayOf(android.graphics.Color.argb(40, 200, 210, 255), android.graphics.Color.TRANSPARENT),
+                floatArrayOf(0.3f, 1f), Shader.TileMode.CLAMP)
+            canvas.drawCircle(mx, my, mr * 2.2f, p)
+            p.shader = null
+            // moon body
+            p.shader = RadialGradient(mx - mr * 0.25f, my - mr * 0.25f, mr,
+                intArrayOf(0xFFF5F5FF.toInt(), 0xFFD0D0E8.toInt(), 0xFFA8A8C0.toInt()),
+                floatArrayOf(0f, 0.6f, 1f), Shader.TileMode.CLAMP)
+            canvas.drawCircle(mx, my, mr, p)
+            p.shader = null
+            // simple crater shadows
+            p.color = android.graphics.Color.argb(30, 80, 80, 100)
+            canvas.drawCircle(mx + mr * 0.2f, my + mr * 0.15f, mr * 0.18f, p)
+            canvas.drawCircle(mx - mr * 0.15f, my + mr * 0.3f, mr * 0.12f, p)
+        }
     }
 
     private fun drawScene(canvas: Canvas) {
         when (weatherType) {
             WeatherType.CLEAR -> {
-                drawSun(canvas)
-                sparks.forEach {
-                    p.color = Color.argb(28, 255, 230, 160)
-                    canvas.drawCircle(it.x, it.y, it.size, p)
+                if (isDay) {
+                    drawSun(canvas)
+                    // warm daylight haze particles
+                    sparks.forEach {
+                        p.color = Color.argb(22, 255, 240, 200)
+                        canvas.drawCircle(it.x, it.y, it.size, p)
+                    }
                 }
                 clouds.forEach { drawCloud(canvas, it) }
             }
@@ -275,7 +342,7 @@ class WeatherBackgroundView @JvmOverloads constructor(
             WeatherType.RAIN, WeatherType.DRIZZLE, WeatherType.THUNDERSTORM -> {
                 clouds.forEach { drawCloud(canvas, it) }
                 rain.forEach {
-                    p.color = Color.argb(it.alpha, 150, 200, 255)
+                    p.color = Color.argb(it.alpha, if (isDay) 100 else 150, if (isDay) 160 else 200, if (isDay) 220 else 255)
                     p.strokeWidth = it.thick; p.strokeCap = Paint.Cap.ROUND
                     canvas.drawLine(it.x, it.y, it.x - it.len * 0.2f, it.y + it.len, p)
                 }
@@ -331,7 +398,12 @@ class WeatherBackgroundView @JvmOverloads constructor(
     }
 
     private fun drawCloud(canvas: Canvas, c: Cloud) {
-        p.color = Color.argb(c.alpha, 225, 230, 240)
+        // Day: bright white/grey clouds | Night: darker blue-grey
+        if (isDay) {
+            p.color = Color.argb(c.alpha.coerceAtMost(200), 245, 248, 252)
+        } else {
+            p.color = Color.argb(c.alpha.coerceAtMost(160), 80, 90, 110)
+        }
         val s = c.scale; val cx = c.x; val cy = c.y
         canvas.drawCircle(cx, cy, 50f * s, p)
         canvas.drawCircle(cx + 42f * s, cy - 10f * s, 42f * s, p)
