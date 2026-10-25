@@ -10,40 +10,43 @@ import kotlin.math.sin
 import kotlin.random.Random
 
 /**
- * Fond animé style HTC Sense / Diamond :
- * dégradés sombres, soleil lumineux, pluie, nuages doux, particules.
+ * Animated weather background inspired by HTC Sense 3.0 (18 weather scenes).
+ * Canvas particle system: sun rays, rain, snow, fog, lightning, wind, clouds.
  */
 class WeatherBackgroundView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private var weatherType: WeatherType = WeatherType.CLEAR
+    private var weatherType = WeatherType.CLEAR
     private var isDay = true
-    private var sunAngle = 0f
-    private var pulse = 0f
-    private var pulseDir = 1f
+    private var time = 0f
     private var flashAlpha = 0f
     private var lastFlash = 0L
+    private var boltPath: Path? = null
+    private var boltAlpha = 0f
 
-    private val particles = mutableListOf<Particle>()
+    private val rain = mutableListOf<RainDrop>()
+    private val snow = mutableListOf<SnowFlake>()
     private val clouds = mutableListOf<Cloud>()
+    private val fogLayers = mutableListOf<FogBand>()
+    private val sparks = mutableListOf<Spark>()
+    private val windLeaves = mutableListOf<WindParticle>()
 
-    private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val particlePaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val sunPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val p = Paint(Paint.ANTI_ALIAS_FLAG)
     private val rayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        strokeCap = Paint.Cap.ROUND
-        style = Paint.Style.STROKE
+        style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND
     }
-    private val cloudPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    data class Particle(var x: Float, var y: Float, var speed: Float, var size: Float, var alpha: Int = 200, var drift: Float = 0f)
-    data class Cloud(var x: Float, var y: Float, var speed: Float, var scale: Float, var alpha: Int = 160)
+    data class RainDrop(var x: Float, var y: Float, var speed: Float, var len: Float, var alpha: Int, var thick: Float)
+    data class SnowFlake(var x: Float, var y: Float, var speed: Float, var size: Float, var alpha: Int, var phase: Float)
+    data class Cloud(var x: Float, var y: Float, var speed: Float, var scale: Float, var alpha: Int)
+    data class FogBand(var x: Float, var y: Float, var speed: Float, var w: Float, var h: Float, var alpha: Int)
+    data class Spark(var x: Float, var y: Float, var vx: Float, var vy: Float, var life: Float, var size: Float)
+    data class WindParticle(var x: Float, var y: Float, var speed: Float, var size: Float, var alpha: Int)
 
-    private val frameRunnable = object : Runnable {
+    private val tick = object : Runnable {
         override fun run() {
+            time += 0.016f
             update()
             invalidate()
             postDelayed(this, 16)
@@ -51,365 +54,290 @@ class WeatherBackgroundView @JvmOverloads constructor(
     }
 
     fun setWeather(type: WeatherType, day: Boolean = true) {
-        weatherType = type
-        isDay = day
-        particles.clear()
-        clouds.clear()
-        initParticles()
+        weatherType = type; isDay = day
+        rain.clear(); snow.clear(); clouds.clear(); fogLayers.clear(); sparks.clear(); windLeaves.clear()
+        boltPath = null; flashAlpha = 0f; boltAlpha = 0f
+        spawn()
         invalidate()
     }
 
-    private fun initParticles() {
+    private fun spawn() {
         val w = width.toFloat().coerceAtLeast(1f)
         val h = height.toFloat().coerceAtLeast(1f)
         when (weatherType) {
-            WeatherType.RAIN, WeatherType.DRIZZLE -> {
-                repeat(90) {
-                    particles.add(
-                        Particle(
-                            Random.nextFloat() * w,
-                            Random.nextFloat() * h,
-                            10f + Random.nextFloat() * 16f,
-                            1.5f + Random.nextFloat() * 2.5f,
-                            160 + Random.nextInt(60),
-                            0.1f + Random.nextFloat() * 0.2f
-                        )
-                    )
+            WeatherType.CLEAR -> {
+                // light orbs + soft clouds
+                repeat(20) {
+                    sparks.add(Spark(Random.nextFloat() * w, Random.nextFloat() * h * 0.6f,
+                        0.2f + Random.nextFloat() * 0.4f, 0f, 1f, 10f + Random.nextFloat() * 30f))
                 }
-                // soft clouds
+                repeat(3) {
+                    clouds.add(Cloud(Random.nextFloat() * w, h * 0.5f + Random.nextFloat() * h * 0.2f,
+                        0.12f + Random.nextFloat() * 0.2f, 0.6f + Random.nextFloat() * 0.5f, 40 + Random.nextInt(30)))
+                }
+            }
+            WeatherType.CLOUDS -> {
+                repeat(8) {
+                    clouds.add(Cloud(Random.nextFloat() * w * 1.4f - w * 0.2f,
+                        40f + Random.nextFloat() * h * 0.45f,
+                        0.2f + Random.nextFloat() * 0.5f, 0.9f + Random.nextFloat() * 1.2f, 120 + Random.nextInt(50)))
+                }
+            }
+            WeatherType.MIST -> {
+                repeat(6) {
+                    fogLayers.add(FogBand(Random.nextFloat() * w, h * 0.2f + Random.nextFloat() * h * 0.6f,
+                        0.3f + Random.nextFloat() * 0.5f, w * 0.6f + Random.nextFloat() * w * 0.4f,
+                        80f + Random.nextFloat() * 120f, 50 + Random.nextInt(40)))
+                }
                 repeat(4) {
-                    clouds.add(
-                        Cloud(
-                            Random.nextFloat() * w,
-                            40f + Random.nextFloat() * h * 0.35f,
-                            0.2f + Random.nextFloat() * 0.4f,
-                            0.9f + Random.nextFloat() * 0.8f,
-                            100 + Random.nextInt(50)
-                        )
-                    )
+                    clouds.add(Cloud(Random.nextFloat() * w, Random.nextFloat() * h * 0.4f,
+                        0.15f, 1.2f, 80))
+                }
+            }
+            WeatherType.RAIN, WeatherType.DRIZZLE -> {
+                val count = if (weatherType == WeatherType.DRIZZLE) 60 else 120
+                repeat(count) {
+                    rain.add(RainDrop(Random.nextFloat() * w, Random.nextFloat() * h,
+                        12f + Random.nextFloat() * 18f, 12f + Random.nextFloat() * 18f,
+                        140 + Random.nextInt(80), 1.5f + Random.nextFloat() * 2f))
+                }
+                repeat(5) {
+                    clouds.add(Cloud(Random.nextFloat() * w, 20f + Random.nextFloat() * h * 0.3f,
+                        0.25f + Random.nextFloat() * 0.4f, 1.0f + Random.nextFloat() * 0.8f, 130 + Random.nextInt(40)))
                 }
             }
             WeatherType.THUNDERSTORM -> {
-                repeat(100) {
-                    particles.add(
-                        Particle(
-                            Random.nextFloat() * w, Random.nextFloat() * h,
-                            14f + Random.nextFloat() * 22f, 2f + Random.nextFloat() * 3f,
-                            180, 0.15f
-                        )
-                    )
+                repeat(140) {
+                    rain.add(RainDrop(Random.nextFloat() * w, Random.nextFloat() * h,
+                        16f + Random.nextFloat() * 24f, 16f + Random.nextFloat() * 22f,
+                        180, 2f + Random.nextFloat() * 2.5f))
                 }
-                repeat(3) {
-                    clouds.add(Cloud(Random.nextFloat() * w, 30f + Random.nextFloat() * h * 0.3f, 0.15f, 1.2f, 140))
+                repeat(4) {
+                    clouds.add(Cloud(Random.nextFloat() * w, 10f + Random.nextFloat() * h * 0.25f,
+                        0.2f, 1.4f, 160))
                 }
             }
             WeatherType.SNOW -> {
-                repeat(65) {
-                    particles.add(
-                        Particle(
-                            Random.nextFloat() * w, Random.nextFloat() * h,
-                            1.5f + Random.nextFloat() * 3.5f, 3f + Random.nextFloat() * 5f,
-                            150 + Random.nextInt(90), Random.nextFloat() * 0.02f
-                        )
-                    )
+                repeat(80) {
+                    snow.add(SnowFlake(Random.nextFloat() * w, Random.nextFloat() * h,
+                        1.2f + Random.nextFloat() * 3.5f, 2.5f + Random.nextFloat() * 6f,
+                        140 + Random.nextInt(100), Random.nextFloat() * 6.28f))
+                }
+                repeat(3) {
+                    clouds.add(Cloud(Random.nextFloat() * w, 30f + Random.nextFloat() * h * 0.25f,
+                        0.15f, 1.1f, 100))
                 }
             }
-            WeatherType.CLEAR -> {
-                // floating light orbs (HTC glow particles)
-                repeat(18) {
-                    particles.add(
-                        Particle(
-                            Random.nextFloat() * w,
-                            Random.nextFloat() * h * 0.7f,
-                            0.15f + Random.nextFloat() * 0.35f,
-                            8f + Random.nextFloat() * 28f,
-                            20 + Random.nextInt(35)
-                        )
-                    )
-                }
-                // soft distant clouds
-                if (isDay) {
-                    repeat(3) {
-                        clouds.add(
-                            Cloud(
-                                Random.nextFloat() * w,
-                                h * 0.45f + Random.nextFloat() * h * 0.25f,
-                                0.15f + Random.nextFloat() * 0.25f,
-                                0.7f + Random.nextFloat() * 0.5f,
-                                50 + Random.nextInt(40)
-                            )
-                        )
-                    }
+            else -> {
+                // wind-like drift
+                repeat(40) {
+                    windLeaves.add(WindParticle(Random.nextFloat() * w, Random.nextFloat() * h,
+                        3f + Random.nextFloat() * 6f, 2f + Random.nextFloat() * 4f, 100 + Random.nextInt(80)))
                 }
             }
-            WeatherType.CLOUDS, WeatherType.MIST -> {
-                repeat(7) {
-                    clouds.add(
-                        Cloud(
-                            Random.nextFloat() * w * 1.3f - w * 0.15f,
-                            50f + Random.nextFloat() * h * 0.5f,
-                            0.25f + Random.nextFloat() * 0.55f,
-                            0.8f + Random.nextFloat() * 1.1f,
-                            if (weatherType == WeatherType.MIST) 70 else 130
-                        )
-                    )
-                }
-            }
-            else -> {}
         }
     }
 
     private fun update() {
-        val w = width.toFloat()
-        val h = height.toFloat()
+        val w = width.toFloat(); val h = height.toFloat()
         if (w <= 0 || h <= 0) return
 
-        sunAngle = (sunAngle + 0.35f) % 360f
-        pulse += 0.025f * pulseDir
-        if (pulse > 1f) pulseDir = -1f
-        if (pulse < 0f) pulseDir = 1f
-
         when (weatherType) {
-            WeatherType.RAIN, WeatherType.DRIZZLE, WeatherType.THUNDERSTORM -> {
-                particles.forEach {
-                    it.y += it.speed
-                    it.x += it.speed * it.drift
-                    if (it.y > h + 20) {
-                        it.y = -20f
-                        it.x = Random.nextFloat() * w
-                    }
+            WeatherType.CLEAR -> {
+                sparks.forEach {
+                    it.x += it.vx
+                    if (it.x > w + it.size) it.x = -it.size
                 }
-                clouds.forEach {
+                clouds.forEach { it.x += it.speed; if (it.x > w + 200) it.x = -250f }
+            }
+            WeatherType.CLOUDS, WeatherType.MIST -> {
+                clouds.forEach { it.x += it.speed; if (it.x > w + 280) it.x = -320f }
+                fogLayers.forEach {
                     it.x += it.speed
-                    if (it.x > w + 200) it.x = -280f
+                    if (it.x > w + it.w) it.x = -it.w
                 }
+            }
+            WeatherType.RAIN, WeatherType.DRIZZLE, WeatherType.THUNDERSTORM -> {
+                rain.forEach {
+                    it.y += it.speed
+                    it.x += it.speed * 0.12f
+                    if (it.y > h + 30) { it.y = -30f; it.x = Random.nextFloat() * w }
+                }
+                clouds.forEach { it.x += it.speed; if (it.x > w + 250) it.x = -300f }
                 if (weatherType == WeatherType.THUNDERSTORM) {
                     val now = System.currentTimeMillis()
-                    if (now - lastFlash > 4000 + Random.nextLong(5000)) {
-                        flashAlpha = 0.65f
+                    if (now - lastFlash > 3200 + Random.nextLong(4500)) {
+                        flashAlpha = 0.85f
+                        boltAlpha = 1f
+                        boltPath = makeLightning(w, h)
                         lastFlash = now
                     }
-                    flashAlpha *= 0.91f
+                    flashAlpha *= 0.88f
+                    boltAlpha *= 0.92f
                 }
             }
             WeatherType.SNOW -> {
-                particles.forEach {
+                snow.forEach {
                     it.y += it.speed
-                    it.x += sin(it.y * 0.02f + it.drift * 50) * 1.3f
-                    if (it.y > h) {
-                        it.y = -10f
-                        it.x = Random.nextFloat() * w
-                    }
+                    it.x += sin(it.y * 0.02f + it.phase) * 1.6f
+                    if (it.y > h + 10) { it.y = -10f; it.x = Random.nextFloat() * w }
+                }
+                clouds.forEach { it.x += it.speed; if (it.x > w + 200) it.x = -250f }
+            }
+            else -> {
+                windLeaves.forEach {
+                    it.x += it.speed
+                    it.y += sin(it.x * 0.02f) * 1.5f
+                    if (it.x > w + 20) { it.x = -20f; it.y = Random.nextFloat() * h }
                 }
             }
-            WeatherType.CLEAR -> {
-                particles.forEach {
-                    it.x += it.speed
-                    it.y += sin(it.x * 0.01f) * 0.15f
-                    if (it.x > w + it.size) it.x = -it.size
-                }
-                clouds.forEach {
-                    it.x += it.speed
-                    if (it.x > w + 200) it.x = -250f
-                }
-            }
-            WeatherType.CLOUDS, WeatherType.MIST -> {
-                clouds.forEach {
-                    it.x += it.speed
-                    if (it.x > w + 250) it.x = -300f
-                }
-            }
-            else -> {}
         }
+    }
+
+    private fun makeLightning(w: Float, h: Float): Path {
+        val path = Path()
+        var x = w * (0.3f + Random.nextFloat() * 0.4f)
+        var y = 0f
+        path.moveTo(x, y)
+        while (y < h * 0.7f) {
+            x += (Random.nextFloat() - 0.5f) * 80f
+            y += 40f + Random.nextFloat() * 60f
+            path.lineTo(x, y)
+            if (Random.nextFloat() > 0.6f) {
+                // branch
+                path.moveTo(x, y)
+                path.lineTo(x + (Random.nextFloat() - 0.5f) * 100f, y + 30f + Random.nextFloat() * 40f)
+                path.moveTo(x, y)
+            }
+        }
+        return path
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-        initParticles()
+        super.onSizeChanged(w, h, oldw, oldh); spawn()
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        post(frameRunnable)
-    }
-
-    override fun onDetachedFromWindow() {
-        removeCallbacks(frameRunnable)
-        super.onDetachedFromWindow()
-    }
+    override fun onAttachedToWindow() { super.onAttachedToWindow(); post(tick) }
+    override fun onDetachedFromWindow() { removeCallbacks(tick); super.onDetachedFromWindow() }
 
     override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        drawGradient(canvas)
-        drawWeather(canvas)
-        if (flashAlpha > 0.04f) {
-            canvas.drawColor(Color.argb((flashAlpha * 180).toInt(), 255, 255, 230))
+        drawBg(canvas)
+        drawScene(canvas)
+        if (flashAlpha > 0.03f) canvas.drawColor(Color.argb((flashAlpha * 200).toInt(), 255, 255, 240))
+        if (boltAlpha > 0.05f && boltPath != null) {
+            p.color = Color.argb((boltAlpha * 255).toInt(), 255, 255, 220)
+            p.strokeWidth = 4f; p.style = Paint.Style.STROKE; p.strokeCap = Paint.Cap.ROUND
+            canvas.drawPath(boltPath!!, p)
+            p.style = Paint.Style.FILL
         }
     }
 
-    private fun drawGradient(canvas: Canvas) {
+    private fun drawBg(canvas: Canvas) {
         val colors = when (weatherType) {
             WeatherType.CLEAR -> if (isDay)
-                // HTC day: deep blue to softer blue
-                intArrayOf(
-                    Color.parseColor("#0A1628"),
-                    Color.parseColor("#0D2137"),
-                    Color.parseColor("#123A5C"),
-                    Color.parseColor("#1A4A6E")
-                )
+                intArrayOf(0xFF071428.toInt(), 0xFF0C2A4A.toInt(), 0xFF154A72.toInt(), 0xFF1E6A8C.toInt())
             else
-                intArrayOf(
-                    Color.parseColor("#050510"),
-                    Color.parseColor("#0A0A1A"),
-                    Color.parseColor("#12122A"),
-                    Color.parseColor("#1A1A35")
-                )
-            WeatherType.CLOUDS -> intArrayOf(
-                Color.parseColor("#1A1F28"),
-                Color.parseColor("#252B36"),
-                Color.parseColor("#2E3642"),
-                Color.parseColor("#3A4452")
-            )
-            WeatherType.RAIN, WeatherType.DRIZZLE -> intArrayOf(
-                Color.parseColor("#0C1220"),
-                Color.parseColor("#121C30"),
-                Color.parseColor("#1A2840"),
-                Color.parseColor("#223550")
-            )
-            WeatherType.THUNDERSTORM -> intArrayOf(
-                Color.parseColor("#08080E"),
-                Color.parseColor("#101018"),
-                Color.parseColor("#181820"),
-                Color.parseColor("#222228")
-            )
-            WeatherType.SNOW -> intArrayOf(
-                Color.parseColor("#1C2430"),
-                Color.parseColor("#2A3440"),
-                Color.parseColor("#3A4654"),
-                Color.parseColor("#4A5868")
-            )
-            WeatherType.MIST -> intArrayOf(
-                Color.parseColor("#2A2A30"),
-                Color.parseColor("#3A3A42"),
-                Color.parseColor("#4A4A52"),
-                Color.parseColor("#5A5A62")
-            )
-            else -> intArrayOf(
-                Color.parseColor("#0D0D15"),
-                Color.parseColor("#151520"),
-                Color.parseColor("#1A1A2E")
-            )
+                intArrayOf(0xFF030308.toInt(), 0xFF0A0A18.toInt(), 0xFF12122A.toInt(), 0xFF1A1A38.toInt())
+            WeatherType.CLOUDS -> intArrayOf(0xFF1A2030.toInt(), 0xFF283040.toInt(), 0xFF384050.toInt(), 0xFF485060.toInt())
+            WeatherType.MIST -> intArrayOf(0xFF2A2A35.toInt(), 0xFF3A3A48.toInt(), 0xFF4A4A58.toInt(), 0xFF5A5A68.toInt())
+            WeatherType.RAIN, WeatherType.DRIZZLE -> intArrayOf(0xFF0A1020.toInt(), 0xFF121C32.toInt(), 0xFF1A2A48.toInt(), 0xFF223858.toInt())
+            WeatherType.THUNDERSTORM -> intArrayOf(0xFF06060C.toInt(), 0xFF0E0E16.toInt(), 0xFF16161E.toInt(), 0xFF1E1E28.toInt())
+            WeatherType.SNOW -> intArrayOf(0xFF1A2430.toInt(), 0xFF2A3848.toInt(), 0xFF3A4C5C.toInt(), 0xFF4A6070.toInt())
+            else -> intArrayOf(0xFF0D1520.toInt(), 0xFF152030.toInt(), 0xFF1A2A40.toInt(), 0xFF203050.toInt())
         }
-        bgPaint.shader = LinearGradient(
-            0f, 0f, 0f, height.toFloat(),
-            colors, floatArrayOf(0f, 0.35f, 0.7f, 1f),
-            Shader.TileMode.CLAMP
-        )
-        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), bgPaint)
+        p.shader = LinearGradient(0f, 0f, 0f, height.toFloat(), colors,
+            floatArrayOf(0f, 0.35f, 0.7f, 1f), Shader.TileMode.CLAMP)
+        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), p)
+        p.shader = null
     }
 
-    private fun drawWeather(canvas: Canvas) {
+    private fun drawScene(canvas: Canvas) {
         when (weatherType) {
             WeatherType.CLEAR -> {
-                drawHtcSun(canvas)
-                // soft orbs
-                particles.forEach {
-                    particlePaint.color = Color.argb(it.alpha, 255, 235, 180)
-                    canvas.drawCircle(it.x, it.y, it.size, particlePaint)
+                drawSun(canvas)
+                sparks.forEach {
+                    p.color = Color.argb(28, 255, 230, 160)
+                    canvas.drawCircle(it.x, it.y, it.size, p)
                 }
-                clouds.forEach { drawSoftCloud(canvas, it) }
+                clouds.forEach { drawCloud(canvas, it) }
+            }
+            WeatherType.CLOUDS -> clouds.forEach { drawCloud(canvas, it) }
+            WeatherType.MIST -> {
+                clouds.forEach { drawCloud(canvas, it) }
+                fogLayers.forEach {
+                    p.shader = LinearGradient(it.x, it.y, it.x + it.w, it.y + it.h,
+                        intArrayOf(Color.TRANSPARENT, Color.argb(it.alpha, 200, 200, 210), Color.TRANSPARENT),
+                        floatArrayOf(0f, 0.5f, 1f), Shader.TileMode.CLAMP)
+                    canvas.drawRect(it.x, it.y, it.x + it.w, it.y + it.h, p)
+                    p.shader = null
+                }
             }
             WeatherType.RAIN, WeatherType.DRIZZLE, WeatherType.THUNDERSTORM -> {
-                clouds.forEach { drawSoftCloud(canvas, it) }
-                // rain streaks – HTC style thin blue lines
-                particlePaint.strokeWidth = 2.2f
-                particlePaint.strokeCap = Paint.Cap.ROUND
-                particles.forEach {
-                    particlePaint.color = Color.argb(it.alpha, 140, 190, 255)
-                    canvas.drawLine(
-                        it.x, it.y,
-                        it.x - it.size * 0.35f, it.y + it.size * 6f,
-                        particlePaint
-                    )
+                clouds.forEach { drawCloud(canvas, it) }
+                rain.forEach {
+                    p.color = Color.argb(it.alpha, 150, 200, 255)
+                    p.strokeWidth = it.thick; p.strokeCap = Paint.Cap.ROUND
+                    canvas.drawLine(it.x, it.y, it.x - it.len * 0.2f, it.y + it.len, p)
                 }
             }
             WeatherType.SNOW -> {
-                particles.forEach {
-                    particlePaint.color = Color.argb(it.alpha, 255, 255, 255)
-                    canvas.drawCircle(it.x, it.y, it.size, particlePaint)
+                clouds.forEach { drawCloud(canvas, it) }
+                snow.forEach {
+                    p.color = Color.argb(it.alpha, 255, 255, 255)
+                    canvas.drawCircle(it.x, it.y, it.size, p)
                 }
             }
-            WeatherType.CLOUDS, WeatherType.MIST -> {
-                clouds.forEach { drawSoftCloud(canvas, it) }
+            else -> {
+                windLeaves.forEach {
+                    p.color = Color.argb(it.alpha, 200, 210, 220)
+                    canvas.drawCircle(it.x, it.y, it.size, p)
+                }
             }
-            else -> {}
         }
     }
 
-    /** Soleil style HTC Diamond : gros, brillant, rayons doux */
-    private fun drawHtcSun(canvas: Canvas) {
-        val cx = width * 0.72f
-        val cy = height * 0.38f
-        val r = width * 0.16f * (1f + pulse * 0.04f)
+    private fun drawSun(canvas: Canvas) {
+        val cx = width * 0.70f
+        val cy = height * 0.32f
+        val r = width * 0.15f * (1f + 0.03f * sin(time * 1.5f))
 
-        // Outer glow (multiple layers like HTC)
-        for (i in 4 downTo 1) {
-            val gr = r * (1.4f + i * 0.35f)
-            val alpha = (18 - i * 3).coerceAtLeast(4)
-            sunPaint.shader = RadialGradient(
-                cx, cy, gr,
-                intArrayOf(
-                    Color.argb(alpha + 10, 255, 200, 80),
-                    Color.argb(0, 255, 200, 80)
-                ),
-                floatArrayOf(0.3f, 1f),
-                Shader.TileMode.CLAMP
-            )
-            canvas.drawCircle(cx, cy, gr, sunPaint)
+        // multi-layer glow (Sense style)
+        for (i in 5 downTo 1) {
+            val gr = r * (1.3f + i * 0.4f)
+            p.shader = RadialGradient(cx, cy, gr,
+                intArrayOf(Color.argb(12 + i * 4, 255, 200, 90), Color.TRANSPARENT),
+                floatArrayOf(0.2f, 1f), Shader.TileMode.CLAMP)
+            canvas.drawCircle(cx, cy, gr, p)
         }
-        sunPaint.shader = null
+        p.shader = null
 
-        // Rays
-        rayPaint.strokeWidth = 5f
-        rayPaint.color = Color.argb(160, 255, 220, 120)
-        for (i in 0 until 12) {
-            val a = Math.toRadians((i * 30.0 + sunAngle))
-            val start = r * 1.25f
-            val end = r * (1.75f + pulse * 0.12f)
+        // rays
+        rayPaint.strokeWidth = 4.5f
+        rayPaint.color = Color.argb(150, 255, 220, 130)
+        for (i in 0 until 14) {
+            val a = Math.toRadians(i * (360.0 / 14) + time * 12)
+            val s = r * 1.3f; val e = r * (1.8f + 0.1f * sin(time * 2 + i))
             canvas.drawLine(
-                cx + (cos(a) * start).toFloat(),
-                cy + (sin(a) * start).toFloat(),
-                cx + (cos(a) * end).toFloat(),
-                cy + (sin(a) * end).toFloat(),
-                rayPaint
-            )
+                cx + (cos(a) * s).toFloat(), cy + (sin(a) * s).toFloat(),
+                cx + (cos(a) * e).toFloat(), cy + (sin(a) * e).toFloat(), rayPaint)
         }
 
-        // Core – bright yellow like HTC
-        sunPaint.shader = RadialGradient(
-            cx - r * 0.15f, cy - r * 0.15f, r,
-            intArrayOf(
-                Color.parseColor("#FFF59D"),
-                Color.parseColor("#FFD54F"),
-                Color.parseColor("#FFB300")
-            ),
-            floatArrayOf(0f, 0.55f, 1f),
-            Shader.TileMode.CLAMP
-        )
-        canvas.drawCircle(cx, cy, r, sunPaint)
-        sunPaint.shader = null
+        // core
+        p.shader = RadialGradient(cx - r * 0.2f, cy - r * 0.2f, r,
+            intArrayOf(0xFFFFF59D.toInt(), 0xFFFFD54F.toInt(), 0xFFFFA000.toInt()),
+            floatArrayOf(0f, 0.5f, 1f), Shader.TileMode.CLAMP)
+        canvas.drawCircle(cx, cy, r, p)
+        p.shader = null
     }
 
-    private fun drawSoftCloud(canvas: Canvas, c: Cloud) {
-        cloudPaint.color = Color.argb(c.alpha, 230, 235, 245)
-        val s = c.scale
-        val cx = c.x
-        val cy = c.y
-        // HTC-style fluffy cloud (overlapping circles)
-        canvas.drawCircle(cx, cy, 48f * s, cloudPaint)
-        canvas.drawCircle(cx + 38f * s, cy - 8f * s, 40f * s, cloudPaint)
-        canvas.drawCircle(cx - 32f * s, cy + 4f * s, 36f * s, cloudPaint)
-        canvas.drawCircle(cx + 12f * s, cy + 18f * s, 42f * s, cloudPaint)
-        canvas.drawCircle(cx - 10f * s, cy - 18f * s, 34f * s, cloudPaint)
+    private fun drawCloud(canvas: Canvas, c: Cloud) {
+        p.color = Color.argb(c.alpha, 225, 230, 240)
+        val s = c.scale; val cx = c.x; val cy = c.y
+        canvas.drawCircle(cx, cy, 50f * s, p)
+        canvas.drawCircle(cx + 42f * s, cy - 10f * s, 42f * s, p)
+        canvas.drawCircle(cx - 36f * s, cy + 6f * s, 38f * s, p)
+        canvas.drawCircle(cx + 14f * s, cy + 20f * s, 44f * s, p)
+        canvas.drawCircle(cx - 12f * s, cy - 16f * s, 36f * s, p)
+        canvas.drawCircle(cx + 55f * s, cy + 8f * s, 30f * s, p)
     }
 }
