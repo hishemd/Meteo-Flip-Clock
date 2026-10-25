@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -19,44 +19,70 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: 'gradle'
+          cache: gradle
 
-      - name: Setup Android SDK path
+      # استخدام SDK المثبت مسبقًا على الـ runner بدون action معطوب
+      - name: Configure Android SDK
         run: |
-          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
-
-      - name: Accept licenses & install packages
-        run: |
-          SDKMANAGER=$(find /usr/local/lib/android/sdk -name sdkmanager 2>/dev/null | head -1)
-          echo "sdkmanager: $SDKMANAGER"
-          yes | $SDKMANAGER --licenses || true
-          $SDKMANAGER "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          export ANDROID_SDK_ROOT=$ANDROID_HOME
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
+          
+          # ابحث عن sdkmanager
+          SM=$(find $ANDROID_HOME -name "sdkmanager" 2>/dev/null | head -1)
+          echo "sdkmanager path: $SM"
+          
+          if [ -n "$SM" ]; then
+            yes | $SM --licenses || true
+            $SM "platforms;android-34" "build-tools;34.0.0" "platform-tools" || true
+          fi
+          
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          ls -la $ANDROID_HOME/platforms/ || true
+          ls -la $ANDROID_HOME/build-tools/ || true
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
       - name: Build Debug APK
+        id: build
         run: |
-          ./gradlew assembleDebug --stacktrace --no-daemon 2>&1 | tee build.log
-          exit ${PIPESTATUS[0]}
+          set -o pipefail
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee build_full.log
+        continue-on-error: true
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      - name: Show build log on failure
-        if: failure()
+      - name: Show errors on failure
+        if: steps.build.outcome == 'failure'
         run: |
-          echo "===== BUILD LOG (last 150 lines) ====="
-          tail -150 build.log || true
-          echo "===== GRADLE ERRORS ====="
-          grep -i "error\|FAILED\|exception" build.log | tail -40 || true
+          echo "===== TAIL OF BUILD LOG ====="
+          tail -250 build_full.log
+          echo ""
+          echo "===== FILTERED ERRORS ====="
+          grep -iE "error:|e: file://|FAILED|What went wrong|Execution failed|Unresolved reference|cannot find" build_full.log | tail -60 || true
 
-      - name: Upload APK Artifact
-        if: success()
+      - name: Upload build log always
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build_full.log
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Upload APK on success
+        if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: Meteo-Flip-Clock-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
-          if-no-files-found: error
+
+      - name: Fail job if build failed
+        if: steps.build.outcome == 'failure'
+        run: exit 1
