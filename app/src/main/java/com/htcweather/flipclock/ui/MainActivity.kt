@@ -24,7 +24,6 @@ class MainActivity : AppCompatActivity() {
 
         setupObservers()
         setupButtons()
-
         viewModel.loadWeather()
     }
 
@@ -32,17 +31,11 @@ class MainActivity : AppCompatActivity() {
         viewModel.weather.observe(this, Observer { weather ->
             weather ?: return@Observer
             binding.tvCityName.text = weather.cityName
-            binding.tvTemperature.text = String.format(Locale.FRENCH, "%.1f°C", weather.temperature)
-            binding.tvHighLow.text = String.format(
-                Locale.FRENCH,
-                "%.1f° / %.1f°",
-                weather.tempMax,
-                weather.tempMin
-            )
+            binding.tvTemperature.text = viewModel.formatTemp(weather.temperature)
+            binding.tvHighLow.text = "${viewModel.formatTemp(weather.tempMax)} / ${viewModel.formatTemp(weather.tempMin)}"
             binding.tvDate.text = viewModel.formatDate()
             binding.tvSunrise.text = "☀  ${viewModel.formatTime(weather.sunrise)}"
             binding.tvSunset.text = "☾  ${viewModel.formatTime(weather.sunset)}"
-
             binding.weatherIcon.setWeather(weather.conditionId.toWeatherType())
         })
 
@@ -57,9 +50,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         viewModel.error.observe(this, Observer { msg ->
-            msg?.let {
-                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-            }
+            msg?.let { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() }
         })
     }
 
@@ -70,11 +61,13 @@ class MainActivity : AppCompatActivity() {
         binding.btnRefresh.setOnClickListener {
             viewModel.loadWeather()
         }
+        binding.btnSettings.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        // Reload in case a city was added/selected
         viewModel.loadWeather()
     }
 }

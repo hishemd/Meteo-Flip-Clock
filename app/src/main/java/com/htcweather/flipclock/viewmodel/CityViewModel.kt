@@ -10,11 +10,13 @@ import com.htcweather.flipclock.data.WeatherRepository
 import com.htcweather.flipclock.data.local.AppDatabase
 import com.htcweather.flipclock.data.model.CityEntity
 import com.htcweather.flipclock.data.model.GeoResult
+import com.htcweather.flipclock.utils.AppPreferences
 import kotlinx.coroutines.launch
 
 class CityViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = WeatherRepository(AppDatabase.getInstance(application).cityDao())
+    private val prefs = AppPreferences(application)
 
     val cities: LiveData<List<CityEntity>> = repository.getAllCities().asLiveData()
 
@@ -31,7 +33,7 @@ class CityViewModel(application: Application) : AndroidViewModel(application) {
         }
         viewModelScope.launch {
             _isSearching.value = true
-            repository.searchCities(query)
+            repository.searchCities(query, prefs.apiKey)
                 .onSuccess { _searchResults.value = it }
                 .onFailure { _searchResults.value = emptyList() }
             _isSearching.value = false

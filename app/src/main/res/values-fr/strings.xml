@@ -18,5 +18,14 @@
     <string name="humidity">Humidité %1$d%%</string>
     <string name="wind">Vent %1$.1f km/h</string>
     <string name="no_cities">Aucune ville. Ajoutez-en une !</string>
-    <string name="api_key_hint">Clé OpenWeatherMap (optionnel pour démo)</string>
+    <string name="api_key_hint">Collez votre clé OpenWeatherMap</string>
+    <string name="settings">Paramètres</string>
+    <string name="api_key_label">Clé API météo (OpenWeatherMap)</string>
+    <string name="api_key_help">Créez une clé gratuite sur openweathermap.org/api — sans clé l\'app fonctionne en mode démo.</string>
+    <string name="temp_unit">Unité de température</string>
+    <string name="auto_refresh">Actualisation automatique</string>
+    <string name="set_live_wallpaper">Définir comme fond d\'écran animé</string>
+    <string name="wallpaper_help">Le fond d\'écran change automatiquement selon la météo (style HTC Diamond).</string>
+    <string name="wallpaper_description">Fond d\'écran animé synchronisé avec la météo – style HTC Sense / Diamond</string>
+    <string name="settings_saved">Paramètres enregistrés</string>
 </resources>

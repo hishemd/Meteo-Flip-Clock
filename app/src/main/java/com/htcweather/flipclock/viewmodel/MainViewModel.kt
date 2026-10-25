@@ -11,6 +11,7 @@ import com.htcweather.flipclock.data.model.CityEntity
 import com.htcweather.flipclock.data.model.WeatherType
 import com.htcweather.flipclock.data.model.WeatherUiModel
 import com.htcweather.flipclock.data.model.toWeatherType
+import com.htcweather.flipclock.utils.AppPreferences
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -19,6 +20,7 @@ import java.util.*
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = WeatherRepository(AppDatabase.getInstance(application).cityDao())
+    private val prefs = AppPreferences(application)
 
     private val _weather = MutableLiveData<WeatherUiModel?>()
     val weather: LiveData<WeatherUiModel?> = _weather
@@ -51,7 +53,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 if (city == null) {
-                    // First launch – create a default home city (Paris as demo)
                     val default = CityEntity(
                         name = "Maison",
                         country = "FR",
@@ -77,20 +78,32 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun fetchFor(lat: Double, lon: Double, fallbackName: String) {
-        val result = repository.fetchWeather(lat, lon)
+        val result = repository.fetchWeather(lat, lon, prefs.apiKey)
         result.onSuccess { model ->
             val display = if (fallbackName == "Maison") model.copy(cityName = "Maison") else model
             _weather.value = display
-            _weatherType.value = display.conditionId.toWeatherType()
+            val type = display.conditionId.toWeatherType()
+            _weatherType.value = type
+
+            // Save for Live Wallpaper
+            prefs.lastLat = lat.toFloat()
+            prefs.lastLon = lon.toFloat()
+            prefs.lastConditionId = display.conditionId
+            prefs.lastCityName = display.cityName
         }.onFailure {
             _error.value = it.message ?: "Impossible de récupérer la météo"
-            // Keep previous weather if any
         }
     }
 
     fun selectCity(city: CityEntity) {
         selectedCityId = city.id
         loadWeather(city.id)
+    }
+
+    fun formatTemp(temp: Double): String {
+        val value = if (prefs.useCelsius) temp else temp * 9 / 5 + 32
+        val unit = if (prefs.useCelsius) "°C" else "°F"
+        return String.format(Locale.FRENCH, "%.1f%s", value, unit)
     }
 
     fun formatTime(unix: Long): String {
