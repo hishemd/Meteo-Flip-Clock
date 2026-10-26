@@ -100,6 +100,7 @@ class WeatherRepository(private val cityDao: CityDao) {
             iconCode = "01d",
             humidity = 55,
             windSpeed = 10.0,
+            pressure = 1015,
             sunrise = now - 3600 * 5,
             sunset = now + 3600 * 4,
             feelsLike = temp + 1,

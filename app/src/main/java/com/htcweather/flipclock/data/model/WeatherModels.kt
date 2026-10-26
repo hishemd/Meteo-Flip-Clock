@@ -64,10 +64,11 @@ data class WeatherUiModel(
     val tempMin: Double,
     val tempMax: Double,
     val description: String,
-    val conditionId: Int,          // OpenWeather condition id
+    val conditionId: Int,
     val iconCode: String,
     val humidity: Int,
     val windSpeed: Double,
+    val pressure: Int = 1013,
     val sunrise: Long,
     val sunset: Long,
     val feelsLike: Double,
