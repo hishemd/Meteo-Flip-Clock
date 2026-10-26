@@ -44,6 +44,7 @@ class WeatherRepository(private val cityDao: CityDao) {
                 iconCode = condition.icon,
                 humidity = main.humidity,
                 windSpeed = (response.wind?.speed ?: 0.0) * 3.6,
+                pressure = main.pressure,
                 sunrise = sys?.sunrise ?: 0L,
                 sunset = sys?.sunset ?: 0L,
                 feelsLike = main.feelsLike,

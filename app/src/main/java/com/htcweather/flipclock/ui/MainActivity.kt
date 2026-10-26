@@ -20,6 +20,14 @@ import com.htcweather.flipclock.utils.AppPreferences
 import com.htcweather.flipclock.viewmodel.MainViewModel
 import java.text.SimpleDateFormat
 import java.util.*
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.os.Handler
+import android.os.Looper
+import com.htcweather.flipclock.widget.Widget1FlipLarge
+import com.htcweather.flipclock.widget.Widget2ClockOnly
+import com.htcweather.flipclock.widget.Widget3Compact
+import com.htcweather.flipclock.widget.Widget4Tall
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,6 +36,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var prefs: AppPreferences
     private var manualWeatherOverride: WeatherType? = null
     private var flipDemoRunning = false
+    private val uiHandler = Handler(Looper.getMainLooper())
+    private val autoRefreshRunnable = object : Runnable {
+        override fun run() {
+            viewModel.loadWeather(forceGps = prefs.useGps)
+            scheduleAutoRefresh()
+        }
+    }
 
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -80,9 +95,10 @@ class MainActivity : AppCompatActivity() {
             binding.tvSunrise.text = "☀ ${viewModel.formatTime(weather.sunrise)}"
             binding.tvSunset.text = "☾ ${viewModel.formatTime(weather.sunset)}"
             binding.tvWindRow.text = String.format(Locale.FRENCH, "💨 %.0f km/h", weather.windSpeed)
-            binding.tvPressureRow.text = "—" // filled if available later
+            binding.tvPressureRow.text = "${weather.pressure} hPa"
             binding.tvUpdate.text = "MAJ " + SimpleDateFormat("HH:mm", Locale.FRENCH).format(Date())
             binding.weatherIcon.setWeather(weather.conditionId.toWeatherType())
+            refreshAllWidgets()
         })
 
         viewModel.weatherType.observe(this, Observer { type ->
@@ -198,7 +214,38 @@ class MainActivity : AppCompatActivity() {
             binding.weatherBackground.visibility =
                 if (prefs.dynamicBackground) android.view.View.VISIBLE else android.view.View.GONE
             viewModel.loadWeather(forceGps = prefs.useGps)
+            scheduleAutoRefresh()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        uiHandler.removeCallbacks(autoRefreshRunnable)
+    }
+
+    private fun scheduleAutoRefresh() {
+        uiHandler.removeCallbacks(autoRefreshRunnable)
+        val minutes = prefs.autoRefreshMinutes.coerceAtLeast(15)
+        uiHandler.postDelayed(autoRefreshRunnable, minutes * 60_000L)
+    }
+
+    private fun refreshAllWidgets() {
+        try {
+            val mgr = AppWidgetManager.getInstance(this)
+            listOf(
+                Widget1FlipLarge::class.java,
+                Widget2ClockOnly::class.java,
+                Widget3Compact::class.java,
+                Widget4Tall::class.java
+            ).forEach { cls ->
+                val ids = mgr.getAppWidgetIds(ComponentName(this, cls))
+                if (ids.isNotEmpty()) {
+                    val intent = Intent(this, cls).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+                    sendBroadcast(intent)
+                }
+            }
+        } catch (_: Exception) {}
     }
 
     private fun applySavedLocale() {

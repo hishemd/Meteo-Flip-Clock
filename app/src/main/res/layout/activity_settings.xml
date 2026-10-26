@@ -295,6 +295,18 @@
                         android:layout_marginTop="12dp"
                         app:backgroundTint="#2E7D32"
                         app:cornerRadius="12dp" />
+
+                    <TextView
+                        android:id="@+id/tvAbout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="HTC Diamond Weather Clock v2.0\nFlip Clock • Météo animée • Widgets • Fond live\nFrançais / English / العربية"
+                        android:textColor="#546E7A"
+                        android:textSize="11sp"
+                        android:gravity="center"
+                        android:lineSpacingExtra="2dp" />
+
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
