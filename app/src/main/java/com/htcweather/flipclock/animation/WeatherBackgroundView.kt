@@ -398,19 +398,49 @@ class WeatherBackgroundView @JvmOverloads constructor(
         p.shader = null
     }
 
+    /** Nuages doux type photo (comme capture météo) – volumes flous animés */
     private fun drawCloud(canvas: Canvas, c: Cloud) {
-        // Day: bright white/grey clouds | Night: darker blue-grey
-        if (isDay) {
-            p.color = Color.argb(c.alpha.coerceAtMost(200), 245, 248, 252)
+        val s = c.scale
+        val cx = c.x
+        val cy = c.y + sin(time * 0.6f + c.x * 0.01f) * 4f // léger flottement vertical
+
+        // Couleurs jour / nuit réalistes
+        val (r1, g1, b1, aBase) = if (isDay) {
+            // Blanc-gris lumineux
+            listOf(250, 252, 255, c.alpha.coerceIn(90, 210))
         } else {
-            p.color = Color.argb(c.alpha.coerceAtMost(160), 80, 90, 110)
+            // Bleu-gris nuit comme la capture
+            listOf(95, 110, 140, c.alpha.coerceIn(100, 200))
         }
-        val s = c.scale; val cx = c.x; val cy = c.y
-        canvas.drawCircle(cx, cy, 50f * s, p)
-        canvas.drawCircle(cx + 42f * s, cy - 10f * s, 42f * s, p)
-        canvas.drawCircle(cx - 36f * s, cy + 6f * s, 38f * s, p)
-        canvas.drawCircle(cx + 14f * s, cy + 20f * s, 44f * s, p)
-        canvas.drawCircle(cx - 12f * s, cy - 16f * s, 36f * s, p)
-        canvas.drawCircle(cx + 55f * s, cy + 8f * s, 30f * s, p)
+        val (r2, g2, b2) = if (isDay) listOf(220, 228, 240) else listOf(55, 65, 90)
+
+        // Corps principal – plusieurs blobs flous (RadialGradient)
+        data class Blob(val ox: Float, val oy: Float, val rad: Float, val alphaMul: Float)
+        val blobs = listOf(
+            Blob(0f, 0f, 58f * s, 1f),
+            Blob(48f * s, -14f * s, 50f * s, 0.95f),
+            Blob(-42f * s, 6f * s, 46f * s, 0.9f),
+            Blob(18f * s, 22f * s, 52f * s, 0.92f),
+            Blob(-14f * s, -20f * s, 42f * s, 0.88f),
+            Blob(68f * s, 8f * s, 36f * s, 0.8f),
+            Blob(-55f * s, -8f * s, 34f * s, 0.75f),
+            Blob(30f * s, -28f * s, 38f * s, 0.7f)
+        )
+        for (b in blobs) {
+            val rad = b.rad
+            val a = (aBase * b.alphaMul).toInt().coerceIn(20, 230)
+            p.shader = RadialGradient(
+                cx + b.ox, cy + b.oy, rad,
+                intArrayOf(
+                    Color.argb(a, r1, g1, b1),
+                    Color.argb((a * 0.55f).toInt(), r2, g2, b2),
+                    Color.TRANSPARENT
+                ),
+                floatArrayOf(0f, 0.55f, 1f),
+                Shader.TileMode.CLAMP
+            )
+            canvas.drawCircle(cx + b.ox, cy + b.oy, rad, p)
+        }
+        p.shader = null
     }
 }
