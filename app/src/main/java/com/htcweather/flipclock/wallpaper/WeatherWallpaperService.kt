@@ -406,15 +406,40 @@ class WeatherWallpaperService : WallpaperService() {
         }
 
         private fun drawCloud(canvas: Canvas, c: Cloud) {
-            if (isDay) p.color = Color.argb(c.alpha.coerceAtMost(200), 245, 248, 252)
-            else p.color = Color.argb(c.alpha.coerceAtMost(160), 80, 90, 110)
-            val s = c.scale; val cx = c.x; val cy = c.y
-            canvas.drawCircle(cx, cy, 52f * s, p)
-            canvas.drawCircle(cx + 44f * s, cy - 10f * s, 44f * s, p)
-            canvas.drawCircle(cx - 38f * s, cy + 6f * s, 40f * s, p)
-            canvas.drawCircle(cx + 14f * s, cy + 22f * s, 46f * s, p)
-            canvas.drawCircle(cx - 12f * s, cy - 18f * s, 38f * s, p)
-            canvas.drawCircle(cx + 58f * s, cy + 8f * s, 32f * s, p)
+            val s = c.scale
+            val cx = c.x
+            val cy = c.y + kotlin.math.sin(time * 0.6f + c.x * 0.01f) * 4f
+            val (r1, g1, b1, aBase) = if (isDay) {
+                listOf(250, 252, 255, c.alpha.coerceIn(90, 210))
+            } else {
+                listOf(95, 110, 140, c.alpha.coerceIn(100, 200))
+            }
+            val (r2, g2, b2) = if (isDay) listOf(220, 228, 240) else listOf(55, 65, 90)
+            val blobs = listOf(
+                0f to 0f to 58f, 48f to -14f to 50f, -42f to 6f to 46f,
+                18f to 22f to 52f, -14f to -20f to 42f, 68f to 8f to 36f
+            )
+            // simplified blob list
+            val ox = floatArrayOf(0f, 48f*s, -42f*s, 18f*s, -14f*s, 68f*s)
+            val oy = floatArrayOf(0f, -14f*s, 6f*s, 22f*s, -20f*s, 8f*s)
+            val rads = floatArrayOf(58f*s, 50f*s, 46f*s, 52f*s, 42f*s, 36f*s)
+            for (i in ox.indices) {
+                val rad = rads[i]
+                val a = (aBase * (1f - i * 0.05f)).toInt().coerceIn(30, 220)
+                p.shader = android.graphics.RadialGradient(
+                    cx + ox[i], cy + oy[i], rad,
+                    intArrayOf(
+                        android.graphics.Color.argb(a, r1, g1, b1),
+                        android.graphics.Color.argb((a * 0.5f).toInt(), r2, g2, b2),
+                        android.graphics.Color.TRANSPARENT
+                    ),
+                    floatArrayOf(0f, 0.55f, 1f),
+                    android.graphics.Shader.TileMode.CLAMP
+                )
+                canvas.drawCircle(cx + ox[i], cy + oy[i], rad, p)
+            }
+            p.shader = null
+
         }
     }
 }

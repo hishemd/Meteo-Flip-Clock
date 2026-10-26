@@ -66,21 +66,22 @@ class WeatherBackgroundView @JvmOverloads constructor(
         val h = height.toFloat().coerceAtLeast(1f)
         when (weatherType) {
             WeatherType.CLEAR -> {
-                // light orbs + soft clouds
-                repeat(20) {
-                    sparks.add(Spark(Random.nextFloat() * w, Random.nextFloat() * h * 0.6f,
-                        0.2f + Random.nextFloat() * 0.4f, 0f, 1f, 10f + Random.nextFloat() * 30f))
+                repeat(18) {
+                    sparks.add(Spark(Random.nextFloat() * w, Random.nextFloat() * h * 0.55f,
+                        0.15f + Random.nextFloat() * 0.35f, 0f, 1f, 10f + Random.nextFloat() * 28f))
                 }
-                repeat(3) {
-                    clouds.add(Cloud(Random.nextFloat() * w, h * 0.5f + Random.nextFloat() * h * 0.2f,
-                        0.12f + Random.nextFloat() * 0.2f, 0.6f + Random.nextFloat() * 0.5f, 40 + Random.nextInt(30)))
+                // Nuages hauts réalistes
+                repeat(6) {
+                    clouds.add(Cloud(Random.nextFloat() * w * 1.3f - w * 0.15f,
+                        20f + Random.nextFloat() * h * 0.3f,
+                        0.06f + Random.nextFloat() * 0.16f, 1.2f + Random.nextFloat() * 1.0f, 120 + Random.nextInt(50)))
                 }
             }
             WeatherType.CLOUDS -> {
-                repeat(8) {
-                    clouds.add(Cloud(Random.nextFloat() * w * 1.4f - w * 0.2f,
-                        40f + Random.nextFloat() * h * 0.45f,
-                        0.2f + Random.nextFloat() * 0.5f, 0.9f + Random.nextFloat() * 1.2f, 120 + Random.nextInt(50)))
+                repeat(11) {
+                    clouds.add(Cloud(Random.nextFloat() * w * 1.5f - w * 0.25f,
+                        15f + Random.nextFloat() * h * 0.42f,
+                        0.1f + Random.nextFloat() * 0.3f, 1.1f + Random.nextFloat() * 1.3f, 140 + Random.nextInt(55)))
                 }
             }
             WeatherType.MIST -> {
