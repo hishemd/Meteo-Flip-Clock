@@ -236,33 +236,34 @@ class WeatherBackgroundView @JvmOverloads constructor(
         // Realistic day / night sky gradients
         val colors = when (weatherType) {
             WeatherType.CLEAR -> if (isDay)
-                // Real clear day: deep zenith blue → horizon lighter cyan
-                intArrayOf(0xFF1A6BB5.toInt(), 0xFF3A8FD0.toInt(), 0xFF6BB5E8.toInt(), 0xFFA8D4F0.toInt())
+                // Ciel bleu réaliste (jour)
+                intArrayOf(0xFF1E88E5.toInt(), 0xFF42A5F5.toInt(), 0xFF64B5F6.toInt(), 0xFF90CAF9.toInt())
             else
-                // Real clear night: near-black → deep navy → slight horizon glow
                 intArrayOf(0xFF020208.toInt(), 0xFF0A0E1C.toInt(), 0xFF12182C.toInt(), 0xFF1A2238.toInt())
             WeatherType.CLOUDS -> if (isDay)
-                intArrayOf(0xFF5A7A98.toInt(), 0xFF6A8AA8.toInt(), 0xFF8AA8C0.toInt(), 0xFFA8C0D0.toInt())
+                // Bleu légèrement voilé
+                intArrayOf(0xFF5C9BC7.toInt(), 0xFF7AAFD4.toInt(), 0xFF9BC4E0.toInt(), 0xFFB8D4E8.toInt())
             else
                 intArrayOf(0xFF0C1018.toInt(), 0xFF161C28.toInt(), 0xFF222A38.toInt(), 0xFF2E3648.toInt())
             WeatherType.MIST -> if (isDay)
-                intArrayOf(0xFF8A9AAA.toInt(), 0xFF9AAABA.toInt(), 0xFFB0C0C8.toInt(), 0xFFC8D4D8.toInt())
+                intArrayOf(0xFF7EAECC.toInt(), 0xFF96BED6.toInt(), 0xFFB0CCE0.toInt(), 0xFFC8DCE8.toInt())
             else
                 intArrayOf(0xFF1A1E28.toInt(), 0xFF2A3040.toInt(), 0xFF3A4250.toInt(), 0xFF4A5260.toInt())
             WeatherType.RAIN, WeatherType.DRIZZLE -> if (isDay)
-                intArrayOf(0xFF3A5068.toInt(), 0xFF4A6078.toInt(), 0xFF5A7890.toInt(), 0xFF6A88A0.toInt())
+                // Bleu-gris pluvieux mais encore bleuté
+                intArrayOf(0xFF4A7FA8.toInt(), 0xFF5A8FB8.toInt(), 0xFF6A9FC8.toInt(), 0xFF7AAFD0.toInt())
             else
                 intArrayOf(0xFF080C14.toInt(), 0xFF101820.toInt(), 0xFF182028.toInt(), 0xFF203040.toInt())
             WeatherType.THUNDERSTORM -> if (isDay)
-                intArrayOf(0xFF2A3040.toInt(), 0xFF3A4050.toInt(), 0xFF4A5060.toInt(), 0xFF5A6070.toInt())
+                intArrayOf(0xFF3A5A78.toInt(), 0xFF4A6A88.toInt(), 0xFF5A7A98.toInt(), 0xFF6A8AA8.toInt())
             else
                 intArrayOf(0xFF040408.toInt(), 0xFF0A0A10.toInt(), 0xFF121218.toInt(), 0xFF1A1A22.toInt())
             WeatherType.SNOW -> if (isDay)
-                intArrayOf(0xFF6A8098.toInt(), 0xFF8098B0.toInt(), 0xFFA0B8C8.toInt(), 0xFFC0D0DC.toInt())
+                intArrayOf(0xFF6A9AB8.toInt(), 0xFF82AEC8.toInt(), 0xFF9AC0D4.toInt(), 0xFFB2D0E0.toInt())
             else
                 intArrayOf(0xFF0C1420.toInt(), 0xFF182430.toInt(), 0xFF283848.toInt(), 0xFF384858.toInt())
             else -> if (isDay)
-                intArrayOf(0xFF4A6A88.toInt(), 0xFF5A7A98.toInt(), 0xFF7A9AB0.toInt(), 0xFF9AB8C8.toInt())
+                intArrayOf(0xFF3A8FD0.toInt(), 0xFF5AA5DC.toInt(), 0xFF7ABBE8.toInt(), 0xFF9ACFF0.toInt())
             else
                 intArrayOf(0xFF080C18.toInt(), 0xFF101828.toInt(), 0xFF1A2438.toInt(), 0xFF243048.toInt())
         }
