@@ -29,9 +29,20 @@ class AppPreferences(context: Context) {
         get() = prefs.getString(KEY_LANG, "fr") ?: "fr"
         set(value) = prefs.edit().putString(KEY_LANG, value).apply()
 
-    var showSeconds: Boolean
-        get() = prefs.getBoolean(KEY_SECONDS, false)
-        set(value) = prefs.edit().putBoolean(KEY_SECONDS, value).apply()
+    /** Fond d'écran météo dynamique */
+    var dynamicBackground: Boolean
+        get() = prefs.getBoolean(KEY_DYN_BG, true)
+        set(value) = prefs.edit().putBoolean(KEY_DYN_BG, value).apply()
+
+    /** 0=Blanc nacré, 1=Noir carbone, 2=Givré 3D */
+    var flipFinish: Int
+        get() = prefs.getInt(KEY_FLIP_FINISH, 0)
+        set(value) = prefs.edit().putInt(KEY_FLIP_FINISH, value).apply()
+
+    /** Son + vibration à chaque flip */
+    var flipSound: Boolean
+        get() = prefs.getBoolean(KEY_FLIP_SOUND, true)
+        set(value) = prefs.edit().putBoolean(KEY_FLIP_SOUND, value).apply()
 
     var lastLat: Float
         get() = prefs.getFloat(KEY_LAT, 48.8566f)
@@ -67,7 +78,9 @@ class AppPreferences(context: Context) {
         private const val KEY_REFRESH = "auto_refresh"
         private const val KEY_GPS = "use_gps"
         private const val KEY_LANG = "language"
-        private const val KEY_SECONDS = "show_seconds"
+        private const val KEY_DYN_BG = "dynamic_bg"
+        private const val KEY_FLIP_FINISH = "flip_finish"
+        private const val KEY_FLIP_SOUND = "flip_sound"
         private const val KEY_LAT = "last_lat"
         private const val KEY_LON = "last_lon"
         private const val KEY_CONDITION = "last_condition"

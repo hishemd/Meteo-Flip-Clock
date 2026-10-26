@@ -7,6 +7,11 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import java.util.*
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import com.htcweather.flipclock.utils.AppPreferences
 import kotlin.math.abs
 
 /**
@@ -74,7 +79,8 @@ class FlipClockView @JvmOverloads constructor(
     private val timer = Timer("FlipClock", true)
 
     init {
-        setLayerType(LAYER_TYPE_SOFTWARE, null) // for blur shadow
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
+        applyFinish(AppPreferences(context).flipFinish)
         timer.scheduleAtFixedRate(object : TimerTask() {
             override fun run() { post { tick() } }
         }, 0, 500)
@@ -138,6 +144,7 @@ class FlipClockView @JvmOverloads constructor(
             })
         }
         animators[index] = anim
+        hapticTick()
         anim.start()
     }
 
@@ -237,6 +244,52 @@ class FlipClockView @JvmOverloads constructor(
             digitPaint.alpha = 255
             canvas.restore()
         }
+    }
+
+    fun applyFinish(finish: Int) {
+        when (finish) {
+            1 -> { // Noir carbone
+                cardPaint.color = android.graphics.Color.parseColor("#1A1A1A")
+                cardTopPaint.color = android.graphics.Color.parseColor("#2A2A2A")
+                cardBottomPaint.color = android.graphics.Color.parseColor("#121212")
+                digitPaint.color = android.graphics.Color.parseColor("#ECEFF1")
+                linePaint.color = android.graphics.Color.parseColor("#424242")
+            }
+            2 -> { // Givré 3D
+                cardPaint.color = android.graphics.Color.parseColor("#E8EEF5")
+                cardTopPaint.color = android.graphics.Color.parseColor("#F5F9FF")
+                cardBottomPaint.color = android.graphics.Color.parseColor("#D0D8E8")
+                digitPaint.color = android.graphics.Color.parseColor("#37474F")
+                linePaint.color = android.graphics.Color.parseColor("#90A4AE")
+            }
+            else -> { // Blanc nacré
+                cardPaint.color = android.graphics.Color.parseColor("#F8F8F8")
+                cardTopPaint.color = android.graphics.Color.parseColor("#FFFFFF")
+                cardBottomPaint.color = android.graphics.Color.parseColor("#EEEEEE")
+                digitPaint.color = android.graphics.Color.parseColor("#212121")
+                linePaint.color = android.graphics.Color.parseColor("#BDBDBD")
+            }
+        }
+        invalidate()
+    }
+
+    private fun hapticTick() {
+        if (!AppPreferences(context).flipSound) return
+        try {
+            if (Build.VERSION.SDK_INT >= 31) {
+                val vm = context.getSystemService(VibratorManager::class.java)
+                vm?.defaultVibrator?.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                val v = context.getSystemService(Vibrator::class.java)
+                if (Build.VERSION.SDK_INT >= 26) {
+                    v?.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
+                } else {
+                    @Suppress("DEPRECATION")
+                    v?.vibrate(30)
+                }
+            }
+        } catch (_: Exception) {}
     }
 
     override fun onDetachedFromWindow() {

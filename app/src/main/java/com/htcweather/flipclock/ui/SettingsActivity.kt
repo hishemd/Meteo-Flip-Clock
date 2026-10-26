@@ -3,11 +3,10 @@ package com.htcweather.flipclock.ui
 import android.app.WallpaperManager
 import android.content.ComponentName
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
 import com.htcweather.flipclock.databinding.ActivitySettingsBinding
 import com.htcweather.flipclock.utils.AppPreferences
 import com.htcweather.flipclock.wallpaper.WeatherWallpaperService
@@ -18,11 +17,6 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
     private lateinit var prefs: AppPreferences
 
-    private val refreshOptions = listOf(15, 30, 60, 120)
-    private val refreshLabels = listOf("15 min", "30 min", "1 h", "2 h")
-    private val langCodes = listOf("fr", "en", "ar")
-    private val langLabels = listOf("Français", "English", "العربية")
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
@@ -30,66 +24,101 @@ class SettingsActivity : AppCompatActivity() {
 
         prefs = AppPreferences(this)
         loadCurrent()
+        wireActions()
+    }
 
-        binding.spinnerRefresh.adapter = ArrayAdapter(
-            this, android.R.layout.simple_spinner_dropdown_item, refreshLabels
-        )
-        binding.spinnerRefresh.setSelection(
-            refreshOptions.indexOf(prefs.autoRefreshMinutes).coerceAtLeast(0)
-        )
+    private fun loadCurrent() {
+        binding.switchDynBg.isChecked = prefs.dynamicBackground
+        binding.switchFlipSound.isChecked = prefs.flipSound
+        binding.switchGps.isChecked = prefs.useGps
+        updateUnitButtons(prefs.useCelsius)
+        updateFinishButtons(prefs.flipFinish)
 
-        binding.spinnerLanguage.adapter = ArrayAdapter(
-            this, android.R.layout.simple_spinner_dropdown_item, langLabels
-        )
-        binding.spinnerLanguage.setSelection(
-            langCodes.indexOf(prefs.language).coerceAtLeast(0)
-        )
+        val city = prefs.lastCityName
+        val temp = String.format(Locale.FRENCH, "%.0f°C", prefs.lastTemp)
+        binding.tvWidgetPreview1.text = "10:48 • $city $temp"
+    }
 
-        binding.btnSave.setOnClickListener { save() }
+    private fun wireActions() {
+        // Instant apply toggles
+        binding.switchDynBg.setOnCheckedChangeListener { _, checked ->
+            prefs.dynamicBackground = checked
+        }
+        binding.switchFlipSound.setOnCheckedChangeListener { _, checked ->
+            prefs.flipSound = checked
+        }
+        binding.switchGps.setOnCheckedChangeListener { _, checked ->
+            prefs.useGps = checked
+        }
+
+        binding.btnUnitC.setOnClickListener {
+            prefs.useCelsius = true
+            updateUnitButtons(true)
+        }
+        binding.btnUnitF.setOnClickListener {
+            prefs.useCelsius = false
+            updateUnitButtons(false)
+        }
+
+        binding.btnFinishWhite.setOnClickListener {
+            prefs.flipFinish = 0
+            updateFinishButtons(0)
+            Toast.makeText(this, "Finition : Blanc nacré", Toast.LENGTH_SHORT).show()
+        }
+        binding.btnFinishBlack.setOnClickListener {
+            prefs.flipFinish = 1
+            updateFinishButtons(1)
+            Toast.makeText(this, "Finition : Noir carbone", Toast.LENGTH_SHORT).show()
+        }
+        binding.btnFinishFrost.setOnClickListener {
+            prefs.flipFinish = 2
+            updateFinishButtons(2)
+            Toast.makeText(this, "Finition : Givré 3D", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnThemeRain.setOnClickListener {
+            startActivity(Intent(this, WeatherPreviewActivity::class.java))
+        }
+        binding.btnThemeSun.setOnClickListener {
+            startActivity(Intent(this, WeatherPreviewActivity::class.java))
+        }
+        binding.btnThemeMist.setOnClickListener {
+            startActivity(Intent(this, WeatherPreviewActivity::class.java))
+        }
+
         binding.btnSetWallpaper.setOnClickListener { openLiveWallpaperPicker() }
         binding.btnPreviewWeather.setOnClickListener {
             startActivity(Intent(this, WeatherPreviewActivity::class.java))
         }
-    }
-
-    private fun loadCurrent() {
-        binding.etApiKey.setText(prefs.apiKey)
-        binding.switchGps.isChecked = prefs.useGps
-        if (prefs.useCelsius) binding.rbCelsius.isChecked = true
-        else binding.rbFahrenheit.isChecked = true
-    }
-
-    private fun save() {
-        prefs.apiKey = binding.etApiKey.text?.toString()?.trim() ?: ""
-        prefs.useCelsius = binding.rbCelsius.isChecked
-        prefs.useGps = binding.switchGps.isChecked
-        val rPos = binding.spinnerRefresh.selectedItemPosition.coerceIn(0, refreshOptions.lastIndex)
-        prefs.autoRefreshMinutes = refreshOptions[rPos]
-
-        val lPos = binding.spinnerLanguage.selectedItemPosition.coerceIn(0, langCodes.lastIndex)
-        val newLang = langCodes[lPos]
-        val langChanged = newLang != prefs.language
-        prefs.language = newLang
-
-        if (langChanged) {
-            applyLocale(newLang)
+        binding.btnSave.setOnClickListener {
+            Toast.makeText(this, getString(com.htcweather.flipclock.R.string.settings_saved), Toast.LENGTH_SHORT).show()
+            finish()
         }
 
-        Toast.makeText(this, getString(com.htcweather.flipclock.R.string.settings_saved), Toast.LENGTH_SHORT).show()
-        finish()
+        binding.navHome.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+            finish()
+        }
+        binding.navMeteo.setOnClickListener {
+            startActivity(Intent(this, DetailsActivity::class.java))
+        }
+        binding.navCities.setOnClickListener {
+            startActivity(Intent(this, CityListActivity::class.java))
+        }
     }
 
-    private fun applyLocale(lang: String) {
-        val locale = Locale(lang)
-        Locale.setDefault(locale)
-        val config = Configuration(resources.configuration)
-        config.setLocale(locale)
-        resources.updateConfiguration(config, resources.displayMetrics)
-        // Restart main to apply
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    private fun updateUnitButtons(celsius: Boolean) {
+        binding.btnUnitC.setBackgroundColor(if (celsius) 0xFF4FC3F7.toInt() else 0xFF37474F.toInt())
+        binding.btnUnitF.setBackgroundColor(if (!celsius) 0xFF4FC3F7.toInt() else 0xFF37474F.toInt())
+    }
+
+    private fun updateFinishButtons(finish: Int) {
+        fun tint(btn: MaterialButton, selected: Boolean) {
+            btn.setBackgroundColor(if (selected) 0xFF4FC3F7.toInt() else 0xFF37474F.toInt())
         }
-        startActivity(intent)
+        tint(binding.btnFinishWhite, finish == 0)
+        tint(binding.btnFinishBlack, finish == 1)
+        tint(binding.btnFinishFrost, finish == 2)
     }
 
     private fun openLiveWallpaperPicker() {
@@ -105,7 +134,7 @@ class SettingsActivity : AppCompatActivity() {
             try {
                 startActivity(Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER))
             } catch (e2: Exception) {
-                Toast.makeText(this, "Settings → Wallpaper → Live wallpapers", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Paramètres système → Fond d'écran animé", Toast.LENGTH_LONG).show()
             }
         }
     }

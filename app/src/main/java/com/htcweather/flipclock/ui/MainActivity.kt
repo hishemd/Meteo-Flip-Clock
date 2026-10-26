@@ -194,6 +194,9 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (::prefs.isInitialized) {
+            binding.flipClock.applyFinish(prefs.flipFinish)
+            binding.weatherBackground.visibility =
+                if (prefs.dynamicBackground) android.view.View.VISIBLE else android.view.View.GONE
             viewModel.loadWeather(forceGps = prefs.useGps)
         }
     }
