@@ -96,26 +96,44 @@ class WeatherBackgroundView @JvmOverloads constructor(
                 }
             }
             WeatherType.RAIN, WeatherType.DRIZZLE -> {
-                val count = if (weatherType == WeatherType.DRIZZLE) 60 else 120
+                val count = if (weatherType == WeatherType.DRIZZLE) 90 else 160
                 repeat(count) {
-                    rain.add(RainDrop(Random.nextFloat() * w, Random.nextFloat() * h,
-                        12f + Random.nextFloat() * 18f, 12f + Random.nextFloat() * 18f,
-                        140 + Random.nextInt(80), 1.5f + Random.nextFloat() * 2f))
+                    val kind = Random.nextFloat()
+                    val thick = when {
+                        kind < 0.45f -> 1.2f
+                        kind < 0.85f -> 2.0f
+                        else -> 2.8f
+                    }
+                    val alpha = when {
+                        kind < 0.45f -> 140
+                        kind < 0.85f -> 190
+                        else -> 230
+                    }
+                    rain.add(RainDrop(
+                        Random.nextFloat() * w, Random.nextFloat() * h,
+                        14f + Random.nextFloat() * 22f,
+                        14f + Random.nextFloat() * 20f,
+                        alpha, thick
+                    ))
                 }
-                repeat(5) {
-                    clouds.add(Cloud(Random.nextFloat() * w, 20f + Random.nextFloat() * h * 0.3f,
-                        0.25f + Random.nextFloat() * 0.4f, 1.0f + Random.nextFloat() * 0.8f, 130 + Random.nextInt(40)))
+                // Dark heavy rain clouds at top
+                repeat(6) {
+                    clouds.add(Cloud(Random.nextFloat() * w * 1.2f - w * 0.1f,
+                        5f + Random.nextFloat() * h * 0.22f,
+                        0.15f + Random.nextFloat() * 0.3f, 1.3f + Random.nextFloat() * 0.9f, 180 + Random.nextInt(40)))
                 }
             }
             WeatherType.THUNDERSTORM -> {
-                repeat(140) {
+                repeat(200) {
+                    val kind = Random.nextFloat()
+                    val thick = if (kind < 0.5f) 1.5f else 2.8f
                     rain.add(RainDrop(Random.nextFloat() * w, Random.nextFloat() * h,
-                        16f + Random.nextFloat() * 24f, 16f + Random.nextFloat() * 22f,
-                        180, 2f + Random.nextFloat() * 2.5f))
+                        18f + Random.nextFloat() * 28f, 18f + Random.nextFloat() * 26f,
+                        200 + Random.nextInt(50), thick))
                 }
-                repeat(4) {
-                    clouds.add(Cloud(Random.nextFloat() * w, 10f + Random.nextFloat() * h * 0.25f,
-                        0.2f, 1.4f, 160))
+                repeat(6) {
+                    clouds.add(Cloud(Random.nextFloat() * w, 0f + Random.nextFloat() * h * 0.2f,
+                        0.2f, 1.5f + Random.nextFloat() * 0.5f, 200))
                 }
             }
             WeatherType.SNOW -> {
@@ -237,28 +255,26 @@ class WeatherBackgroundView @JvmOverloads constructor(
         // Realistic day / night sky gradients
         val colors = when (weatherType) {
             WeatherType.CLEAR -> if (isDay)
-                // Ciel bleu réaliste (jour)
-                intArrayOf(0xFF1E88E5.toInt(), 0xFF42A5F5.toInt(), 0xFF64B5F6.toInt(), 0xFF90CAF9.toInt())
+                // HTML-like sunny: #1e90ff → #87ceeb → soft warm
+                intArrayOf(0xFF1E90FF.toInt(), 0xFF4AA8FF.toInt(), 0xFF87CEEB.toInt(), 0xFFB8DCE8.toInt())
             else
-                intArrayOf(0xFF020208.toInt(), 0xFF0A0E1C.toInt(), 0xFF12182C.toInt(), 0xFF1A2238.toInt())
+                intArrayOf(0xFF0D1B2A.toInt(), 0xFF1B263B.toInt(), 0xFF2A3A55.toInt(), 0xFF415A77.toInt())
             WeatherType.CLOUDS -> if (isDay)
-                // Bleu légèrement voilé
-                intArrayOf(0xFF5C9BC7.toInt(), 0xFF7AAFD4.toInt(), 0xFF9BC4E0.toInt(), 0xFFB8D4E8.toInt())
+                intArrayOf(0xFF607D8B.toInt(), 0xFF78909C.toInt(), 0xFF90A4AE.toInt(), 0xFFB0BEC5.toInt())
             else
-                intArrayOf(0xFF0C1018.toInt(), 0xFF161C28.toInt(), 0xFF222A38.toInt(), 0xFF2E3648.toInt())
+                intArrayOf(0xFF1A252F.toInt(), 0xFF2C3E50.toInt(), 0xFF34495E.toInt(), 0xFF3D566E.toInt())
             WeatherType.MIST -> if (isDay)
                 intArrayOf(0xFF7EAECC.toInt(), 0xFF96BED6.toInt(), 0xFFB0CCE0.toInt(), 0xFFC8DCE8.toInt())
             else
                 intArrayOf(0xFF1A1E28.toInt(), 0xFF2A3040.toInt(), 0xFF3A4250.toInt(), 0xFF4A5260.toInt())
             WeatherType.RAIN, WeatherType.DRIZZLE -> if (isDay)
-                // Bleu-gris pluvieux mais encore bleuté
-                intArrayOf(0xFF4A7FA8.toInt(), 0xFF5A8FB8.toInt(), 0xFF6A9FC8.toInt(), 0xFF7AAFD0.toInt())
+                intArrayOf(0xFF1C2833.toInt(), 0xFF2C3E50.toInt(), 0xFF34495E.toInt(), 0xFF3D566E.toInt())
             else
-                intArrayOf(0xFF080C14.toInt(), 0xFF101820.toInt(), 0xFF182028.toInt(), 0xFF203040.toInt())
+                intArrayOf(0xFF0F1A24.toInt(), 0xFF1C2833.toInt(), 0xFF2C3E50.toInt(), 0xFF34495E.toInt())
             WeatherType.THUNDERSTORM -> if (isDay)
-                intArrayOf(0xFF3A5A78.toInt(), 0xFF4A6A88.toInt(), 0xFF5A7A98.toInt(), 0xFF6A8AA8.toInt())
+                intArrayOf(0xFF1A237E.toInt(), 0xFF283593.toInt(), 0xFF303F9F.toInt(), 0xFF3949AB.toInt())
             else
-                intArrayOf(0xFF040408.toInt(), 0xFF0A0A10.toInt(), 0xFF121218.toInt(), 0xFF1A1A22.toInt())
+                intArrayOf(0xFF0D1440.toInt(), 0xFF1A237E.toInt(), 0xFF283593.toInt(), 0xFF303F9F.toInt())
             WeatherType.SNOW -> if (isDay)
                 intArrayOf(0xFF6A9AB8.toInt(), 0xFF82AEC8.toInt(), 0xFF9AC0D4.toInt(), 0xFFB2D0E0.toInt())
             else
