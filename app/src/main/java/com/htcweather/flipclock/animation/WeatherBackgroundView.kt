@@ -360,10 +360,32 @@ class WeatherBackgroundView @JvmOverloads constructor(
             WeatherType.RAIN, WeatherType.DRIZZLE, WeatherType.THUNDERSTORM -> {
                 clouds.forEach { drawCloud(canvas, it) }
                 rain.forEach {
-                    p.color = Color.argb(it.alpha, if (isDay) 100 else 150, if (isDay) 160 else 200, if (isDay) 220 else 255)
-                    p.strokeWidth = it.thick; p.strokeCap = Paint.Cap.ROUND
-                    canvas.drawLine(it.x, it.y, it.x - it.len * 0.2f, it.y + it.len, p)
+                    p.strokeWidth = it.thick
+                    p.strokeCap = Paint.Cap.ROUND
+                    val x2 = it.x - it.len * 0.25f
+                    val y2 = it.y + it.len
+                    p.shader = LinearGradient(
+                        it.x, it.y, x2, y2,
+                        intArrayOf(
+                            Color.argb(0, 174, 194, 224),
+                            Color.argb((it.alpha * 0.45f).toInt(), 174, 194, 224),
+                            Color.argb(it.alpha, 200, 220, 255),
+                            Color.argb(it.alpha, 255, 255, 255)
+                        ),
+                        floatArrayOf(0f, 0.2f, 0.75f, 1f),
+                        Shader.TileMode.CLAMP
+                    )
+                    canvas.drawLine(it.x, it.y, x2, y2, p)
+                    p.shader = null
                 }
+                // Brouillard bas (comme HTML rain-mist)
+                p.shader = LinearGradient(
+                    0f, height * 0.65f, 0f, height.toFloat(),
+                    intArrayOf(Color.TRANSPARENT, Color.argb(75, 80, 110, 140)),
+                    null, Shader.TileMode.CLAMP
+                )
+                canvas.drawRect(0f, height * 0.65f, width.toFloat(), height.toFloat(), p)
+                p.shader = null
             }
             WeatherType.SNOW -> {
                 clouds.forEach { drawCloud(canvas, it) }
